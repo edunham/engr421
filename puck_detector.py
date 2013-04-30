@@ -10,13 +10,17 @@ import cv2
 import time
 import numpy
 import os
+from shooters import *
 
 def open_camera(cam_id = 0):
     cap = cv2.VideoCapture(cam_id)
     cap.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, 600);
     cap.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, 800);
     cap.set(cv2.cv.CV_CAP_PROP_FPS, 30);
-    return cap
+hooter = shooter(3, 8) 
+CenterSooter = shooter(3, 12) 
+RightShooter = shooter(3, 16)
+
 
 
 def get_frame(device):
@@ -110,6 +114,28 @@ def new_rgb_image(width, height):
     image = numpy.zeros( (height, width, 3), numpy.uint8)
     return image
 
+def choose_center(centers):
+    nearesty = sorted(centers, key = lambda pair: pair[0])
+    # blindspot logic goes here
+    return nearesty[0]
+
+def aim_shooter(centers, shooter):
+    deg = 45
+    target = choose_center(centers) # :t target (x,y) 
+    
+
+    if deg == 0:
+        aim = 1
+    else:
+        aim = (17.0/6) * deg
+    return aim
+
+def draw_aim(aim, image):
+    #for center in centers:
+    #    cv2.circle(image, tuple(center), 20, cv2.cv.RGB(0,255,255), 2)
+    pass
+
+
 if __name__ == "__main__":
     cam_id=0
     dev = open_camera(cam_id)
@@ -159,9 +185,12 @@ if __name__ == "__main__":
             contours = find_contours(im_bw)
             centers = find_centers(contours)
 
+            aim = aim_shooter(centers, CenterShooter)
+
             results_image = new_rgb_image(transform_size[0], transform_size[1])
             cv2.drawContours(results_image, contours, -1, cv2.cv.RGB(255,0,0), 2)
 
+            draw_aim(aim, results_image)
             draw_centers(centers, results_image)
             cv2.imshow("results", results_image)
 
