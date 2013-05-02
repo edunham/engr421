@@ -37,7 +37,7 @@ class shooter:
             self.comms.aim(self.number, self.aim)
 
 Board = Arduino()
-LeftShooter = shooter(3, 8, 17, Board, 0)
-CenterSooter = shooter(3, 12, 17, Board, 1) 
-RightShooter = shooter(3, 16, 17, Board, 2)
+LeftShooter = shooter(3, 8, 17, Board, 0x01)
+CenterSooter = shooter(3, 12, 17, Board, 0x02) 
+RightShooter = shooter(3, 16, 17, Board, 0x03)
 
