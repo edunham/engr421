@@ -2,7 +2,9 @@ ENGR421 Team 4, Spring 2013
 ===========================
 
 Dean Reading -- Electrical
+
 Emily Dunham -- Software
+
 Minna O'Brien -- Mechanicla
 
 Team [web site][site]
