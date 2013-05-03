@@ -3,7 +3,6 @@
 from puck_detector import *
 from shooters import *
 
-
 def choose_center(centers):
     nearesty = sorted(centers, key = lambda pair: pair[0])
     # game tactics logic goes here
@@ -12,33 +11,22 @@ def choose_center(centers):
 def untan(o,a):
     return math.degrees(math.atan(o/a))
 
-def deg2aim(deg):
-    if deg <= 0:
-        aim = 1
-    elif deg > 90:
-        aim = 128 
-    else:
-        aim = (17.0/6) * deg
-    return aim
-
-def aim_shooter(centers, shooter):
-    deg = 45
-    target = choose_center(centers) # target (x,y) 
-    opp = target[0] - shooter.xpospx # opposite side of the triangle
-    adj = target[1] + shooter.offsetpx # adjacent side to our angle 
-    if opp == 0:
-        deg = 45
-    elif opp > 0: # puck right of shooter
-        deg = 45 + untan(opp, adj)
-    else:
-        deg = 45 - untan(-opp, adj)
 def draw_aim(aim, image):
     #for center in centers:
     #    cv2.circle(image, tuple(center), 20, cv2.cv.RGB(0,255,255), 2)
     pass
 
+def tactical_shoot(shooters, centers):
+    # BB-conservation logic goes here
+    target = choose_center(centers)
+    for s in shooters:
+        if s.can_hit(target):
+            s.shoot(target)
+        else:
+            s.aim(target)
 
 if __name__ == "__main__":
+    shooterlist = [LeftShooter, CenterShooter, RightShooter]
     cam_id=0
     dev = open_camera(cam_id)
     print "camera:"
@@ -90,7 +78,7 @@ dsize=transform_size)
             contours = find_contours(im_bw)
             centers = find_centers(contours)
 
-            #aim = aim_shooter(centers, CenterShooter)
+            tactical_shoot(shooterlist, centers)
 
             results_image = new_rgb_image(transform_size[0],
 transform_size[1])
