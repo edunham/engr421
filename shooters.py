@@ -1,7 +1,6 @@
 #! /usr/bin/env python
-from arduino.py import Ardiuno
 
-class shooter:
+class Shooter:
     def __init__(self, offset, xpos, dpi, comms, n):
         self.offsetin = offset
         self.offsetpx = offset * dpi
@@ -42,9 +41,3 @@ class shooter:
     def shoot(self, target):
         self.aim(target)
         self.fire()
-
-Board = Arduino()
-LeftShooter = shooter(3, 8, 17, Board, 0x01)
-CenterSooter = shooter(3, 12, 17, Board, 0x02) 
-RightShooter = shooter(3, 16, 17, Board, 0x03)
-

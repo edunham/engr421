@@ -1,7 +1,8 @@
 #! /usr/bin/env python
 
 from puck_detector import *
-from shooters import *
+from shooters import Shooter
+from arduino import Arduino
 
 def choose_center(centers):
     nearesty = sorted(centers, key = lambda pair: pair[0])
@@ -26,7 +27,12 @@ def tactical_shoot(shooters, centers):
             s.aim(target)
 
 if __name__ == "__main__":
-    shooterlist = [LeftShooter, CenterShooter, RightShooter]
+    Board = Arduino()
+    left_shooter = Shooter(3, 8, 17, Board, 0x01)
+    center_shooter = Shooter(3, 12, 17, Board, 0x02) 
+    right_shooter = Shooter(3, 16, 17, Board, 0x03)
+
+    shooterlist = [left_shooter, center_shooter, right_shooter]
     cam_id=0
     dev = open_camera(cam_id)
     print "camera:"
