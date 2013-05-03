@@ -36,6 +36,13 @@ class shooter:
             self.aim = target2angle(target)
             self.comms.aim(self.number, self.aim)
 
+    def fire(self):
+        self.comms.fire(self.number)
+
+    def shoot(self, target):
+        self.aim(target)
+        self.fire()
+
 Board = Arduino()
 LeftShooter = shooter(3, 8, 17, Board, 0x01)
 CenterSooter = shooter(3, 12, 17, Board, 0x02) 
