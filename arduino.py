@@ -38,6 +38,28 @@ class Arduino:
         print "FIRING " + str(shooter)
         self.ser.write(data)
 
+class FakeArduino:
+    # for testing purposes
+    def __init__(self):
+        print "THIS IS NOT THE ARDUINO YOU ARE LOOKING FOR"
+        print "~~~~~~~~ Initializing FakeArduino ~~~~~~~~~"
+        self.comms = {"aim": bin(1),
+                      "fire": bin(2),
+                      "GO": bin(ord('G')) + bin(ord('O'))}
+        self.infos = {"start": bin(80)}
+
+    def send(self, data):
+        print "FakeArduino thinks it's sending: " + str(data)
+
+    def read(self):
+        print "Read an imaginary line from FakeArduino"
+
+    def aim(self, shooter, angle):
+        print self.comms["GO"] + self.comms["aim"] + shooter + angle
+
+    def fire(self, shooter):
+        print self.comms["GO"] + self.comms["fire"] + shooter
+
 if __name__ == "__main__":
     slave = Arduino()
     while True:
@@ -49,5 +71,3 @@ if __name__ == "__main__":
         while l:
             print l
             l = slave.ser.readline()
-        
-        

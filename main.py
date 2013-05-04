@@ -1,8 +1,10 @@
 #! /usr/bin/env python
 
 import cv2
+import sys
+
 from shooters import Shooter
-from arduino import Arduino
+from arduino import Arduino, FakeArduino
 from camera import Camera
 
 def choose_center(centers):
@@ -20,10 +22,13 @@ def tactical_shoot(shooters, centers):
             s.aim(target)
 
 if __name__ == "__main__":
-    Board = Arduino()
-    left_shooter = Shooter(3, 8, 17, Board, bin(01))
-    center_shooter = Shooter(3, 12, 17, Board, bin(02)) 
-    right_shooter = Shooter(3, 16, 17, Board, bin(03))
+    if "fake" in sys.argv:
+        board = FakeArduino()
+    else:
+        board = Arduino()
+    left_shooter = Shooter(3, 8, 17, board, bin(01))
+    center_shooter = Shooter(3, 12, 17, board, bin(02)) 
+    right_shooter = Shooter(3, 16, 17, board, bin(03))
     cam = Camera()
     shooterlist = [left_shooter, center_shooter, right_shooter]
 
