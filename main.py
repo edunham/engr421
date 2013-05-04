@@ -33,6 +33,7 @@ if __name__ == "__main__":
     shooterlist = [left_shooter, center_shooter, right_shooter]
 
     cam.calibrate()
+    cam.adj_thresh(2)
 
     while True:
         targets = cam.get_targets()
