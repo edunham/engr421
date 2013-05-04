@@ -30,12 +30,13 @@ class Arduino:
 
     def aim(self, shooter, angle):
         data = self.comms["GO"] + self.comms["aim"] + shooter + angle
-        print "AIMING " + shooter + " AT " + angle
+        print "AIMING " + str(shooter) + " AT " + str(angle)
         self.ser.write(data)
 
     def fire(self, shooter):
         data = self.comms["GO"] + self.comms["fire"] + shooter
-        print "FIRING " + shooter
+        print "FIRING " + str(shooter)
+        self.ser.write(data)
 
 if __name__ == "__main__":
     slave = Arduino()
