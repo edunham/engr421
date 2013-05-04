@@ -1,4 +1,5 @@
 #! /usr/bin/env python
+import math
 
 class Shooter:
     def __init__(self, offset, xpos, dpi, comms, n):
@@ -11,7 +12,7 @@ class Shooter:
         self.centerdeg = 45
         self.rightdeg = 90
 
-        self.aim = 128
+        self.aimval = 128
         self.shot = 0
         self.comms = comms
         self.number = n
@@ -19,7 +20,7 @@ class Shooter:
     def can_hit(self, target):
         return True
 
-    def target2angle(target):
+    def target2angle(self, target):
         opp = target[0] - self.xpospx
         adj = target[1] + self.offsetpx
         deg = self.centerdeg + math.degrees(math.atan(opp/adj))
@@ -28,12 +29,12 @@ class Shooter:
         elif deg >= self.rightdeg:
             return 128
         else:
-            return (17.0/6) * deg
+            return int((17.0/6) * deg)
 
     def aim(self, target):
         if self.can_hit(target):
-            self.aim = target2angle(target)
-            self.comms.aim(self.number, self.aim)
+            self.aimval = self.target2angle(target)
+            self.comms.aim(self.number, bin(self.aimval))
 
     def fire(self):
         self.comms.fire(self.number)

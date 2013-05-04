@@ -23,14 +23,30 @@ class Camera:
         top left, bottom left, top right, bottom right
         click the intersection between ROBOT LINE and BOARD EDGE
         """
+        self.board_size = [22.3125, 45]
+        self.dpi = 17
+        self.tsize = (int(self.board_size[0]*self.dpi), int(self.board_size[1]*self.dpi))
         self.tmat = None
+        self.raw_img = None
+        self.bw_image = None
+        self.targets = []
 
     def get_frame(self):
         ret, img = self.device.read()
         if (ret == False): # failed to capture
             print >> sys.stderr, "Error capturing from video device."
             return None
-        return img
+        self.raw_img = img
+        return img 
+
+    def get_field(self):
+        return cv2.warpPerspective(self.get_frame(), self.tmat, dsize = self.tsize)
+        
+    def get_bw(self):
+        gray = cv2.cvtColor((self.get_field()), cv2.COLOR_RGB2GRAY)
+        (thr, bw) = cv2.threshold(gray, self.threshval, 255, cv2.THRESH_BINARY)
+        self.bw_img = bw
+        return bw
 
     def new_rgb_image(self, width, height):
         image = numpy.zeros((height, width, 3), numpy.uint8)
@@ -41,7 +57,9 @@ class Camera:
             print "Click at (%d,%d)" % (x,y)
             self.cornerpoints.append( (x,y) )
 
-    def calibrate(self, board_size = [22.3125,45], dpi = 72, calib_file = None):
+    def calibrate(self, calib_file = None):
+        board_size = self.board_size
+        dpi = self.dpi
         img = self.get_frame()
         cv2.imshow("Calibrate", img)
         cv2.setMouseCallback("Calibrate", self.mouse_click_callback)
@@ -62,7 +80,7 @@ class Camera:
            
     def get_targets(self):
         centers = []
-        (contours, hierarchy) = cv2.findContours(self.get_frame(), mode=cv2.cv.CV_RETR_EXTERNAL, method=cv2.cv.CV_CHAIN_APPROX_SIMPLE)
+        (contours, hierarchy) = cv2.findContours(self.get_bw(), mode=cv2.cv.CV_RETR_EXTERNAL, method=cv2.cv.CV_CHAIN_APPROX_SIMPLE)
         for contour in contours:
             moments = cv2.moments(contour, True)
             if (len(filter(lambda x: x==0, moments.values())) > 0):# no divide by 0
@@ -70,7 +88,19 @@ class Camera:
             center = (moments['m10']/moments['m00'], moments['m01']/moments['m00'])
             center = map(lambda x: int(round(x)), center) # float to integer
             centers.append(center)
+        self.targets = centers
         return centers
+
+    def display(self, lines = None):
+        cv2.imshow("RAW", self.raw_img)
+        cv2.imshow("B&W", self.bw_img)
+        output = self.new_rgb_image(self.tsize[0], self.tsize[1])
+        linewidth = 2
+        radius = 20
+        for t in self.targets:
+            cv2.circle(output, tuple(t), radius, cv2.cv.RGB(0,255,255), linewidth)
+        # for l in lines...TODO
+        cv2.imshow("RESULTS", output)
 
     def cleanup(self):
         cv2.destroyAllWindows()

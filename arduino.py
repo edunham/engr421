@@ -14,9 +14,10 @@ class Arduino:
             exit()
         self.ser = serial.Serial(port=devpath, baudrate=self.baudrate, timeout=1)
         self.ser.readline()
-        self.commands = {"aim": 0x01,
-                         "fire": 0x02}
-        self.infos = {"start": 0x80}
+        self.comms = {"aim": bin(1),
+                         "fire": bin(2),
+                         "GO": bin(ord('G')) + bin(ord('O'))}
+        self.infos = {"start": bin(80)}
 
     def send(self, data):
         # arbitrary data to board
@@ -28,12 +29,12 @@ class Arduino:
         print "\t"+self.ser.readline()
 
     def aim(self, shooter, angle):
-        data = 'GO' + self.commands["aim"] + shooter + angle
+        data = self.comms["GO"] + self.comms["aim"] + shooter + angle
         print "AIMING " + shooter + " AT " + angle
         self.ser.write(data)
 
     def fire(self, shooter):
-        data = 'GO' + self.commands["fire"] + shooter
+        data = self.comms["GO"] + self.comms["fire"] + shooter
         print "FIRING " + shooter
 
 if __name__ == "__main__":
