@@ -32,6 +32,10 @@ class Camera:
             return None
         return img
 
+    def new_rgb_image(self, width, height):
+        image = numpy.zeros((height, width, 3), numpy.uint8)
+        return image 
+
     def mouse_click_callback(self, event, x, y, flags, param):
         if event == cv2.EVENT_LBUTTONDOWN:
             print "Click at (%d,%d)" % (x,y)
@@ -70,4 +74,5 @@ class Camera:
 
     def cleanup(self):
         cv2.destroyAllWindows()
-        cv2.VideoCapture(self.dev_id).release()      
+        cv2.VideoCapture(self.dev_id).release()
+
