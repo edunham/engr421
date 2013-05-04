@@ -78,24 +78,18 @@ class Camera:
             trans = cv2.getPerspectiveTransform(src, dest)
             self.tmat = trans
 
-    def stable_enough(self, pucks, stability):
-        for i in range(0, stability):
-            if len(self.get_targets()) != pucks:
-                return False
-        return True
-
-    def adj_thresh(self, pucks, stability = 20):
+    def adj_thresh(self, pucks, stability = 10):
         # set self.threshval such that correct number of pucks show up for 
         # the number of consecutive frames set by stability
         old_thresh = self.threshval
         works = []
         print "auto-calibrating threshold..."
-        for t in range(0, 255, 3):
+        for t in range(0, 255, 2):
             print "\t trying " + str(t)
             self.threshval = t
-            if self.stable_enough(pucks, stability):
+            if all((len(self.get_targets()) == pucks) for x in range(stability)):
                 works.append(t)
-        print "WORKS: " + str(works)
+        print "VALID THRESHOLDS: " + str(works)
         if works:
             self.threshval = works[len(works)/2]
         else:
