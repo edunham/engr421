@@ -13,7 +13,8 @@ class Camera:
         cap.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, 600);
         cap.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, 800);
         cap.set(cv2.cv.CV_CAP_PROP_FPS, 30);
-
+        
+        self.dev_id = cam_id
         self.device = cap
         self.threshval = 170
         self.cornerpoints = []
@@ -66,4 +67,7 @@ class Camera:
             center = map(lambda x: int(round(x)), center) # float to integer
             centers.append(center)
         return centers
-      
+
+    def cleanup(self):
+        cv2.destroyAllWindows()
+        cv2.VideoCapture(self.dev_id).release()      
