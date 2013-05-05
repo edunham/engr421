@@ -25,6 +25,7 @@ class Camera:
         """
         self.board_size = [22.3125, 45]
         self.dpi = 17
+        self.puck_min_px = 100
         self.tsize = (int(self.board_size[0]*self.dpi), int(self.board_size[1]*self.dpi))
         self.tmat = None
         self.raw_img = None
@@ -44,6 +45,8 @@ class Camera:
         
     def get_bw(self):
         gray = cv2.cvtColor((self.get_field()), cv2.COLOR_RGB2GRAY)
+        # cv2.threshold(src, thresh, maxval, type[, dst]) ->  retval, dst
+        # dst - output array of the same size and type as src.
         (thr, bw) = cv2.threshold(gray, self.threshval, 255, cv2.THRESH_BINARY)
         self.bw_img = bw
         return bw
@@ -84,14 +87,14 @@ class Camera:
         old_thresh = self.threshval
         works = []
         print "auto-calibrating threshold..."
-        for t in range(0, 255, 2):
+        for t in range(100, 255, 2):
             print "\t trying " + str(t)
             self.threshval = t
             if all((len(self.get_targets()) == pucks) for x in range(stability)):
                 works.append(t)
         print "VALID THRESHOLDS: " + str(works)
         if works:
-            self.threshval = works[len(works)/2]
+            self.threshval = works[0]
         else:
             self.threshval = old_thresh
         print "THRESHHOLD SET TO: " + str(self.threshval)
@@ -99,9 +102,12 @@ class Camera:
     def get_targets(self):
         centers = []
         (contours, hierarchy) = cv2.findContours(self.get_bw(), mode=cv2.cv.CV_RETR_EXTERNAL, method=cv2.cv.CV_CHAIN_APPROX_SIMPLE)
-        for contour in contours:
-            moments = cv2.moments(contour, True)
+        for c in contours:
+            moments = cv2.moments(c, True)
             if (len(filter(lambda x: x==0, moments.values())) > 0):# no divide by 0
+                continue
+            if cv2.contourArea(c) < self.puck_min_px:
+                # reduce false positives
                 continue
             center = (moments['m10']/moments['m00'], moments['m01']/moments['m00'])
             center = map(lambda x: int(round(x)), center) # float to integer
