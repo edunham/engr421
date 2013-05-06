@@ -2,7 +2,7 @@
 import math
 
 class Shooter:
-    def __init__(self, offset, xpos, dpi, comms, n):
+    def __init__(self, offset, xpos, dpi, comms, n, field = [22.3125, 45]):
         self.offsetin = offset
         self.offsetpx = offset * dpi
         self.xposin = xpos
@@ -17,6 +17,7 @@ class Shooter:
         self.shot = 0
         self.comms = comms
         self.number = n
+        self.fieldpx = [field[0] * dpi, field[1] * dpi]
 
     def can_hit(self, target):
         return True
@@ -34,15 +35,15 @@ class Shooter:
         else:
             return int((17.0/6) * self.theta)
 
-    def get_aim_line(self, board_length, line_length = 30):
+    def get_aim_line(self, line_length = 30):
         angle = self.centerdeg - self.theta # + for cw of straight; - for ccw
-        y1 = board_length
+        y1 = self.fieldpx[1] 
         # triangle not visible in img. adj is offset and opposite is where
         # barrel intersects line, since point where angle measured is pivot
         x1 = self.xpospx + int(math.tan(math.radians(angle))) * self.offsetpx
         # aim is hypotenuse of triangle on board, where near angle is 90 - angle
         # y is opposite from that and x is x1 + adjacent
-        y2 = board_length - (int(math.sin(math.radians(90 - angle))) * line_length)
+        y2 = self.fieldpx[1] - (int(math.sin(math.radians(90 - angle))) * line_length)
         x2 = x1 + (int(math.cos(math.radians(90 - angle))) * line_length)
         return ((x1, y1), (x2, y2))
 
