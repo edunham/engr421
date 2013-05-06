@@ -12,6 +12,7 @@ class Shooter:
         self.centerdeg = 45
         self.rightdeg = 90
 
+        self.theta = 45
         self.aimval = 128
         self.shot = 0
         self.comms = comms
@@ -23,13 +24,15 @@ class Shooter:
     def target2angle(self, target):
         opp = target[0] - self.xpospx
         adj = target[1] + self.offsetpx
-        deg = self.centerdeg + math.degrees(math.atan(opp/adj))
-        if deg <= self.leftdeg:
+        self.theta = self.centerdeg + math.degrees(math.atan(opp/adj))
+        if self.theta <= self.leftdeg:
+            self.theta = leftdeg
             return 1
-        elif deg >= self.rightdeg:
+        elif self.theta >= self.rightdeg:
+            self.theta = rightdeg
             return 128
         else:
-            return int((17.0/6) * deg)
+            return int((17.0/6) * self.theta)
 
     def aim(self, target):
         if self.can_hit(target):
