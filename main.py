@@ -33,12 +33,13 @@ if __name__ == "__main__":
     shooterlist = [left_shooter, center_shooter, right_shooter]
 
     cam.calibrate()
-    cam.adj_thresh(2, 50)
+    #cam.adj_thresh(2, 50)
 
     while True:
         targets = cam.get_targets()
-        # tactical_shoot(shooterlist, targets)
-        cam.display(None) 
+        tactical_shoot(shooterlist, targets)
+        aims = [s.get_aim_line() for s in shooterlist]
+        cam.display(aims) 
         if (cv2.waitKey(2) >= 0):
             break
     cam.cleanup()
