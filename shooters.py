@@ -20,7 +20,7 @@ class Shooter:
         self.fieldpx = [field[0] * dpi, field[1] * dpi]
 
     def can_hit(self, target):
-        return True
+        return False 
 
     def target2angle(self, target):
         opp = target[0] - self.xpospx
