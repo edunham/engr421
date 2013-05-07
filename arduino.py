@@ -20,7 +20,7 @@ timeout=1)
                          "GO": 'GO'}
         self.infos = {"start": '\x80'}
         self.shooters = {"left": '\x01',
-                         "center": '\x02'),
+                         "center": '\x02',
                          "right": '\x03'}
 
     def send(self, data):
