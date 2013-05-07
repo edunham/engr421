@@ -28,9 +28,9 @@ if __name__ == "__main__":
         board = FakeArduino()
     else:
         board = Arduino()
-    left_shooter = Shooter(3, 8, 17, board, bin(01))
-    center_shooter = Shooter(3, 12, 17, board, bin(02)) 
-    right_shooter = Shooter(3, 16, 17, board, bin(03))
+    left_shooter = Shooter(3, 8, 17, board, "left")
+    center_shooter = Shooter(3, 12, 17, board, "center") 
+    right_shooter = Shooter(3, 16, 17, board, "right")
     cam = Camera()
     shooterlist = [left_shooter, center_shooter, right_shooter]
 

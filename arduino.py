@@ -12,31 +12,38 @@ class Arduino:
         else:
             print "dude, plug in the Arduino"
             exit()
-        self.ser = serial.Serial(port=devpath, baudrate=self.baudrate, timeout=1)
-        self.ser.readline()
-        self.comms = {"aim": bin(1),
-                         "fire": bin(2),
-                         "GO": bin(ord('G')) + bin(ord('O'))}
-        self.infos = {"start": bin(80)}
+        self.ser = serial.Serial(port=devpath, baudrate=self.baudrate,
+timeout=1)
+        self.read()
+        self.comms = {"aim": '\x01',
+                         "fire": '\x02',
+                         "GO": 'GO'}
+        self.infos = {"start": '\x80'}
+        self.shooters = {"left": '\x01',
+                         "center": '\x02'),
+                         "right": '\x03'}
 
     def send(self, data):
         # arbitrary data to board
+        print "sending " + str(data)
         self.ser.write(data)
 
     def read(self):
         # read one line
         #TODO: check whether it's a code in infos 
-        print "\t"+self.ser.readline()
+        print "READ: " + self.ser.readline()
 
     def aim(self, shooter, angle):
-        data = self.comms["GO"] + self.comms["aim"] + shooter + angle
-        print "AIMING " + str(shooter) + " AT " + str(angle)
+        data = self.comms["GO"] + self.comms["aim"] + self.shooters[shooter] + angle
+        print "\ttrying to aim " + str(shooter) + " AT " + str(angle)
         self.ser.write(data)
+        self.read()
 
     def fire(self, shooter):
-        data = self.comms["GO"] + self.comms["fire"] + shooter
-        print "FIRING " + str(shooter)
+        data = self.comms["GO"] + self.comms["fire"] + self.shooters[shooter]
+        print "\ttrying to fire " + str(shooter)
         self.ser.write(data)
+        self.read()
 
 class FakeArduino:
     # for testing purposes
