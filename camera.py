@@ -123,8 +123,10 @@ class Camera:
         radius = 20
         for t in self.targets:
             cv2.circle(output, tuple(t), radius, cv2.cv.RGB(0,255,255), linewidth)
-        for l in lines:
-            cv2.line(output, l[0], l[1], cv2.cv.RGB(255,255,0), linewidth)
+        if lines is not None:
+            for l in lines:
+                print l
+                cv2.line(output, l[0], l[1], cv2.cv.RGB(255,255,0), linewidth)
         cv2.imshow("RESULTS", output)
 
     def cleanup(self):

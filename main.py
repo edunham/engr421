@@ -8,6 +8,8 @@ from arduino import Arduino, FakeArduino
 from camera import Camera
 
 def choose_center(centers):
+    if centers == []:
+        return centers
     nearesty = sorted(centers, key = lambda pair: pair[0])
     # game tactics logic goes here
     return nearesty[0]
