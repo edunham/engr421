@@ -31,7 +31,7 @@ timeout=1)
     def read(self):
         # read one line
         #TODO: check whether it's a code in infos 
-        print "READ: " + self.ser.readline()
+        print "READ: " + self.ser.readline()[:-1]
 
     def aim(self, shooter, angle):
         data = self.comms["GO"] + self.comms["aim"] + self.shooters[shooter] + angle
