@@ -2,11 +2,9 @@
 import math
 
 class Shooter:
-    def __init__(self, offset, xpos, dpi, comms, n, field = [22.3125, 45]):
-        self.offsetin = offset
-        self.offsetpx = offset * dpi
-        self.xposin = xpos
-        self.xpospx = xpos * dpi
+    def __init__(self, offsetpx, xpospx, dpi, comms, n, field = [22.3125, 45]):
+        self.offsetpx = offset
+        self.xpospx = xpos
 
         self.leftdeg = 0
         self.centerdeg = 45
@@ -37,7 +35,7 @@ class Shooter:
         print "shooter " + self.number + " aimed at theta " + str(self.theta)
         return self.aimval
 
-    def get_aim_line(self, line_length = 30):
+    def get_aim_line(self, line_length = 300):
         angle = self.centerdeg - self.theta # + for cw of straight; - for ccw
         print self.number + " in get_aim_line angle is " + str(angle)
         y1 = self.fieldpx[1]
