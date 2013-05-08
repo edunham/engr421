@@ -28,6 +28,7 @@ class Camera:
         self.puck_min_px = 100
         self.tsize = (int(self.board_size[0]*self.dpi), int(self.board_size[1]*self.dpi))
         self.tmat = None
+        self.field_img = None
         self.raw_img = None
         self.bw_image = None
         self.targets = []
@@ -41,8 +42,9 @@ class Camera:
         return img 
 
     def get_field(self):
-        return cv2.warpPerspective(self.get_frame(), self.tmat, dsize = self.tsize)
-        
+        self.field_img = cv2.warpPerspective(self.get_frame(), self.tmat, dsize = self.tsize)
+        return self.field_img
+
     def get_bw(self):
         gray = cv2.cvtColor((self.get_field()), cv2.COLOR_RGB2GRAY)
         # cv2.threshold(src, thresh, maxval, type[, dst]) ->  retval, dst
@@ -118,7 +120,7 @@ class Camera:
     def display(self, lines = None):
         cv2.imshow("RAW", self.raw_img)
         cv2.imshow("B&W", self.bw_img)
-        output = self.new_rgb_image(self.tsize[0], self.tsize[1])
+        output = self.field_img#self.new_rgb_image(self.tsize[0], self.tsize[1])
         linewidth = 2
         radius = 20
         for t in self.targets:
