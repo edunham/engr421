@@ -24,20 +24,28 @@ def tactical_shoot(shooters, centers):
             else:
                 s.aim(target)
 
+def setup_shooters(board, offset_in = 3, field = [22.3125, 45], dpi = 17):
+    offset = offset_in * dpi
+    wpx = field[0] * dpi
+    sixth = int(wpx / 6)
+    # left shooter centered in first third of board
+    left_shooter = Shooter(offset, sixth, dpi, board, "left")
+    # center shooter centered
+    center_shooter = Shooter(offset, int(wpx / 2), dpi, board, "center") 
+    # right shooter centered in rightmost third of board
+    right_shooter = Shooter(offset, (wpx - sixth), dpi, board, "right")
+    shooterlist = [left_shooter, center_shooter, right_shooter]
+    return shooterlist
+
 def main(args):
     if "fake" in args:
         board = FakeArduino()
     else:
         board = Arduino()
-    left_shooter = Shooter(3, 8, 17, board, "left")
-    center_shooter = Shooter(3, 12, 17, board, "center") 
-    right_shooter = Shooter(3, 16, 17, board, "right")
     cam = Camera()
-    shooterlist = [left_shooter, center_shooter, right_shooter]
-
     cam.calibrate()
     #cam.adj_thresh(2, 50)
-
+    shooterlist = setup_shooters(board, cam.board_size, cam.dpi)
     while True:
         targets = cam.get_targets()
         tactical_shoot(shooterlist, targets)
