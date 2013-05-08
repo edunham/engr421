@@ -22,8 +22,9 @@ class Shooter:
         return self.hit_default
 
     def target2angle(self, target):
+        # y axis is upside-down :( (0,0) is TOP LEFT CORNER of image
         opp = float(target[0] - self.xpospx)
-        adj = float(target[1] + self.offsetpx)
+        adj = float((self.fieldpx[1] - target[1]) + self.offsetpx)
         self.theta = self.centerdeg + math.degrees(math.atan(opp/adj))
         if self.theta <= self.leftdeg:
             self.theta = self.leftdeg
@@ -33,9 +34,11 @@ class Shooter:
             self.aimval = 128
         else:
             self.aimval = int((17.0/6) * self.theta)
+        print "\tT2A" + self.number + ' ' + str(self.theta)
         return self.aimval
 
     def get_aim_line(self, line_length = 100):
+        #TODO: fix the fact that (0,0) is top left corner
         angle = self.centerdeg - self.theta # + for cw of straight; - for ccw
         y1 = self.fieldpx[1]
         # triangle not visible in img. adj is offset and opposite is where
