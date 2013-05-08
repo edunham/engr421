@@ -27,17 +27,17 @@ class Shooter:
         adj = float((self.fieldpx[1] - target[1]) + self.offsetpx)
         self.theta = self.centerdeg + math.degrees(math.atan(opp/adj))
         if self.theta <= self.leftdeg:
-            self.theta = self.leftdeg
+            #self.theta = self.leftdeg
             self.aimval = 1
         elif self.theta >= self.rightdeg:
-            self.theta = self.rightdeg
+            #self.theta = self.rightdeg
             self.aimval = 128
         else:
             self.aimval = int((17.0/6) * self.theta)
         print "\tT2A" + self.number + ' ' + str(self.theta)
         return self.aimval
 
-    def get_aim_line(self, line_length = 100):
+    def get_aim_line(self, line_length = 500):
         #TODO: fix the fact that (0,0) is top left corner
         angle = self.centerdeg - self.theta # + for cw of straight; - for ccw
         y1 = self.fieldpx[1]
@@ -47,9 +47,10 @@ class Shooter:
         x1 = self.xpospx + x1add
         # aim is hypotenuse of triangle on board, where near angle is 90 - angle
         # y is opposite from that and x is x1 + adjacent
-        y2sub = int((math.sin(math.radians(90 - angle)) + .01) * line_length)
-        y2 = self.fieldpx[1] - y2sub
-        x2add = int((math.cos(math.radians(90 - angle)) + .01) * line_length)
+        fix_round_error = .00001
+        y2sub = int((math.cos(math.radians(angle)) + fix_round_error) * line_length)
+        y2 = (self.fieldpx[1] - y2sub) + 2* self.offsetpx
+        x2add = int((math.sin(math.radians(angle)) + fix_round_error) * line_length)
         x2 = x1 - x2add 
         return ((x1, y1), (x2, y2))
 
