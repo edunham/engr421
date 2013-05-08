@@ -47,7 +47,7 @@ class Shooter:
         y2sub = int((math.sin(math.radians(90 - angle)) + .01) * line_length)
         y2 = self.fieldpx[1] - y2sub
         x2add = int((math.cos(math.radians(90 - angle)) + .01) * line_length)
-        x2 = x1 + x2add 
+        x2 = x1 - x2add 
         return ((x1, y1), (x2, y2))
 
     def aim(self, target):
