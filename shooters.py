@@ -20,31 +20,40 @@ class Shooter:
         self.fieldpx = [field[0] * dpi, field[1] * dpi]
 
     def can_hit(self, target):
-        return False 
+        return True 
 
     def target2angle(self, target):
         opp = target[0] - self.xpospx
         adj = target[1] + self.offsetpx
         self.theta = self.centerdeg + math.degrees(math.atan(opp/adj))
         if self.theta <= self.leftdeg:
-            self.theta = leftdeg
-            return 1
+            self.theta = self.leftdeg
+            self.aimval = 1
         elif self.theta >= self.rightdeg:
-            self.theta = rightdeg
-            return 128
+            self.theta = self.rightdeg
+            self.aimval = 128
         else:
-            return int((17.0/6) * self.theta)
+            self.aimval = int((17.0/6) * self.theta)
+        print "shooter " + self.number + " aimed at theta " + str(self.theta)
+        return self.aimval
 
     def get_aim_line(self, line_length = 30):
         angle = self.centerdeg - self.theta # + for cw of straight; - for ccw
-        y1 = self.fieldpx[1] 
+        print self.number + " in get_aim_line angle is " + str(angle)
+        y1 = self.fieldpx[1]
         # triangle not visible in img. adj is offset and opposite is where
         # barrel intersects line, since point where angle measured is pivot
-        x1 = self.xpospx + int(math.tan(math.radians(angle))) * self.offsetpx
+        x1add = int(round(math.tan(math.radians(angle)))) * self.offsetpx
+        print "adding " + str(x1add) + " to x1"
+        x1 = self.xpospx + x1add
         # aim is hypotenuse of triangle on board, where near angle is 90 - angle
         # y is opposite from that and x is x1 + adjacent
-        y2 = self.fieldpx[1] - (int(math.sin(math.radians(90 - angle))) * line_length)
-        x2 = x1 + (int(math.cos(math.radians(90 - angle))) * line_length)
+        y2sub = int(round(math.sin(math.radians(90 - angle)))) * line_length
+        print "subtracting " + str(y2sub) + " from y2"
+        y2 = self.fieldpx[1] - y2sub
+        x2add = int(round(math.cos(math.radians(90 - angle)))) * line_length
+        print "adding " + str(x2add) + " to x2"
+        x2 = x1 + x2add 
         return ((x1, y1), (x2, y2))
 
     def aim(self, target):
