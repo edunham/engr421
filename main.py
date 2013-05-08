@@ -17,11 +17,12 @@ def choose_center(centers):
 def tactical_shoot(shooters, centers):
     # BB-conservation logic goes here
     target = choose_center(centers)
-    for s in shooters:
-        if s.can_hit(target):
-            s.shoot(target)
-        else:
-            s.aim(target)
+    if target:
+        for s in shooters:
+            if s.can_hit(target):
+                s.shoot(target)
+            else:
+                s.aim(target)
 
 if __name__ == "__main__":
     if "fake" in sys.argv:
