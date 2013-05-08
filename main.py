@@ -24,8 +24,8 @@ def tactical_shoot(shooters, centers):
             else:
                 s.aim(target)
 
-if __name__ == "__main__":
-    if "fake" in sys.argv:
+def main(args):
+    if "fake" in args:
         board = FakeArduino()
     else:
         board = Arduino()
@@ -46,3 +46,6 @@ if __name__ == "__main__":
         if (cv2.waitKey(2) >= 0):
             break
     cam.cleanup()
+
+if __name__ == "__main__":
+    main(sys.argv)
