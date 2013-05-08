@@ -2,7 +2,7 @@
 import math
 
 class Shooter:
-    def __init__(self, offsetpx, xpospx, dpi, comms, n, field = [22.3125, 45]):
+    def __init__(self, offset, xpos, dpi, comms, n, field = [22.3125, 45]):
         self.offsetpx = offset
         self.xpospx = xpos
 

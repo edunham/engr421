@@ -45,7 +45,7 @@ def main(args):
     cam = Camera()
     cam.calibrate()
     #cam.adj_thresh(2, 50)
-    shooterlist = setup_shooters(board, cam.board_size, cam.dpi)
+    shooterlist = setup_shooters(board, field = cam.board_size, dpi = cam.dpi)
     while True:
         targets = cam.get_targets()
         tactical_shoot(shooterlist, targets)
