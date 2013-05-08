@@ -2,7 +2,7 @@
 import math
 
 class Shooter:
-    def __init__(self, offset, xpos, dpi, comms, n, field = [22.3125, 45]):
+    def __init__(self, offset, xpos, dpi, comms, n, field = [22.3125, 45], hit_default = True):
         self.offsetpx = offset
         self.xpospx = xpos
 
@@ -16,9 +16,10 @@ class Shooter:
         self.comms = comms
         self.number = n
         self.fieldpx = [field[0] * dpi, field[1] * dpi]
+        self.hit_default = hit_default
         
     def can_hit(self, target):
-        return True 
+        return self.hit_default
 
     def target2angle(self, target):
         opp = float(target[0] - self.xpospx)
