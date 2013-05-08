@@ -33,7 +33,7 @@ def setup_shooters(board, offset_in = 3, field = [22.3125, 45], dpi = 17):
     # center shooter centered
     center_shooter = Shooter(offset, int(wpx / 2), dpi, board, "center") 
     # right shooter centered in rightmost third of board
-    right_shooter = Shooter(offset, (wpx - sixth), dpi, board, "right")
+    right_shooter = Shooter(offset, int(wpx - sixth), dpi, board, "right")
     shooterlist = [left_shooter, center_shooter, right_shooter]
     return shooterlist
 
