@@ -18,10 +18,24 @@ timeout=1)
         self.comms = {"aim": '\x01',
                          "fire": '\x02',
                          "GO": 'GO'}
-        self.infos = {"start": '\x80'}
+        self.infos = {"start": '\x80',
+                      "bad command": '\xE0',
+                      "bad shooter": '\xE1',
+                      "bad angle": '\xE2'}
         self.shooters = {"left": '\x01',
                          "center": '\x02',
                          "right": '\x03'}
+
+    def handle_message(self, msg, line):
+        if msg == "start":
+            print "~~~ HEARD SIGNAL TO START GAME ~~~"
+            #TODO: signal to the main function that game started
+        if msg == "bad command":
+            print "invalid command ID"
+        if msg == "bad shooter":
+            print "recieved invalid shooter number"
+        if msg == "bad angle":
+            print str(line[:-2]) + "cannot fire at that angle"
 
     def send(self, data):
         # arbitrary data to board
@@ -29,9 +43,10 @@ timeout=1)
         self.ser.write(data)
 
     def read(self):
-        # read one line
-        #TODO: check whether it's a code in infos 
-        print "READ: " + self.ser.readline()[:-1]
+        line = self.ser.readline()[:-1] # strip newline
+        for (msg, val) in self.infos:
+            if val in line:
+                handle_message(msg, line)
 
     def aim(self, shooter, angle):
         data = self.comms["GO"] + self.comms["aim"] + self.shooters[shooter] + angle
