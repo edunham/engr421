@@ -14,17 +14,18 @@ class Arduino:
             exit()
         self.ser = serial.Serial(port=devpath, baudrate=self.baudrate,
 timeout=1)
-        self.read()
         self.comms = {"aim": '\x01',
-                         "fire": '\x02',
-                         "GO": 'GO'}
+                      "fire": '\x02',
+                      "GO": 'GO'}
         self.infos = {"start": '\x80',
                       "bad command": '\xE0',
                       "bad shooter": '\xE1',
                       "bad angle": '\xE2'}
         self.shooters = {"left": '\x01',
                          "center": '\x02',
-                         "right": '\x03'}
+                         "right": '\x03',
+                         "error": '\x13'}
+        self.read()
 
     def handle_message(self, msg, line):
         if msg == "start":
@@ -44,9 +45,10 @@ timeout=1)
 
     def read(self):
         line = self.ser.readline()[:-1] # strip newline
-        for (msg, val) in self.infos:
+        for msg, val in self.infos.iteritems():
             if val in line:
                 handle_message(msg, line)
+        print "\t READ: " + line
 
     def aim(self, shooter, angle):
         data = self.comms["GO"] + self.comms["aim"] + self.shooters[shooter] + angle
