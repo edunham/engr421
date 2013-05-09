@@ -24,8 +24,8 @@ def tactical_shoot(shooters, centers):
             else:
                 s.aim(target)
 
-def setup_shooters(board, offset_in = 3, field = [22.3125, 45], dpi = 17):
-    offset = offset_in * dpi
+def setup_shooters(board, offset_in = 1, field = [22.3125, 45], dpi = 17):
+    offset = int(offset_in * dpi)
     wpx = field[0] * dpi
     sixth = int(wpx / 6)
     # left shooter centered in first third of board
@@ -45,7 +45,7 @@ def main(args):
     cam = Camera()
     cam.calibrate()
     #cam.adj_thresh(2, 50)
-    shooterlist = setup_shooters(board, field = cam.board_size, dpi = cam.dpi)
+    shooterlist = setup_shooters(board, offset_in = 9.5, field = cam.board_size, dpi = cam.dpi)
     while True:
         targets = cam.get_targets()
         tactical_shoot(shooterlist, targets)
