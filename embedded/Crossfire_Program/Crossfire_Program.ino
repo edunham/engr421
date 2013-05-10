@@ -289,7 +289,7 @@ void setShooterAngle(byte shooterNum, byte angle){
       Serial.print("Unrecognized shooter Num: ");
       Serial.println(shooterNum);
 #endif
-      //Send error feedback to laptop
+      //Send unrecognized shooter num feedback to laptop
       sendMessage(0xE1,shooterNum);
     }
   }
@@ -305,6 +305,14 @@ void releaseBall(byte shooterNum) {
   Serial.print("Releasing ball from shooter: ");
   Serial.println(shooterNum);
 #endif
+  if (shooterNum<1 || shooterNum>3) { //Check that the shooter number is valid
+    #ifdef DEBUG
+          Serial.print("Unrecognized shooter Num: ");
+          Serial.println(shooterNum);
+    #endif
+          //Send unrecognized shooter num feedback to laptop
+          sendMessage(0xE1,shooterNum);
+  }
 
   digitalWrite(solenoidPins[shooterNum],HIGH); //Activate the solenoid: open the passage
 
@@ -349,7 +357,4 @@ void sendMessage (byte CMD,byte in1, byte in2, byte in3) {
   }
   Serial.println(); //Print a new line character
 }
-
-
-
 
