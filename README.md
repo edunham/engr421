@@ -26,3 +26,8 @@ Arduino code written and maintained by Dean Reading unless marked otherwise.
 
 The .ino files require the Arduino IDE thing to run, which is named arduino 
 and can be installed from one's package manager.
+
+Wiring Notes
+------------
+
+Yellow is to 12V, red is to 5V. Do not plug it in backwards or the board will fry .
