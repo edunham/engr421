@@ -67,6 +67,10 @@
 #define motorLevel2 255
 #define motorLevel3 255
 
+#define offset1 0 //offset angles for each servo
+#define offset2 0
+#define offset3 0
+
 // Libraries & Objects
 /*******************************************************************************************/
 #include <Servo.h>
@@ -86,7 +90,8 @@ const byte motorPins[] = {
   0,pinMotor1,pinMotor2,pinMotor3}; //A map for the solenoid pins
 const byte motorLevel[] = {
   0,motorLevel1,motorLevel2,motorLevel3}; //Individual PWM signal levels for each motor
-
+char offset[] = {
+  0,offset1,offset2,offset3}; //servo offsets
 
 // Global Variables
 /*******************************************************************************************/
@@ -111,6 +116,7 @@ void setup(){
   /*******************************************************************************************/
   commandLength[1]=2;
   commandLength[2]=1;
+  commandLength[3]=2;
 
   commandLength[0x80]=0;
   commandLength[0xE0]=1;
@@ -139,9 +145,9 @@ void setup(){
 
 
   //Attach the servo objects
-  servo1.attach(pinServo1,900,2100); //Include the maximum and minimum pulse widths.
-  servo2.attach(pinServo2,900,2100);
-  servo3.attach(pinServo3,900,2100);
+  servo1.attach(pinServo1,545,2455); //Include the maximum and minimum pulse widths.
+  servo2.attach(pinServo2,545,2455);
+  servo3.attach(pinServo3,545,2455);
 
 
   //Wait until 'Game Start' button is pressed
@@ -238,6 +244,9 @@ void executeCommand(){
     //Release a ball on shooter <db1>
     releaseBall(buffer[0]);
     break;
+    case 3:
+    //Change servo angle offset
+    offset[buffer[0]]=(char) buffer[1]; //Changed to a signed byte
   default:
 #ifdef DEBUG
     Serial.print("Unrecognized command ID: ");
@@ -264,12 +273,15 @@ void setShooterAngle(byte shooterNum, byte angle){
   Serial.println(angle);
 #endif
 
+
   //Set the servo output.  Use a switch statement to use the correct servo object.
   if (angle<angleLowest || angle>angleHighest) {
     //The angle is invalid! Don't move the shooter, and send feedback
     sendMessage(0xE2,shooterNum,angle);
   }
   else{
+      //Apply the angle offset
+      angle += offset[shooterNum];
     switch (shooterNum) {
     case 1:
       servo1.write(angle);
@@ -354,5 +366,6 @@ void sendMessage (byte CMD,byte in1, byte in2, byte in3) {
   }
   Serial.println(); //Print a new line character
 }
+
 
 

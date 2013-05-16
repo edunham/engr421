@@ -43,6 +43,9 @@
 #define pinSolenoid2 6
 #define pinSolenoid3 7
 
+#define offset1 0 //offset angles for each servo
+#define offset2 0
+#define offset3 0
 
 // Parameters
 /*******************************************************************************************/
@@ -51,8 +54,8 @@
 
 #define ballReleaseTime 500 //The time that the solenoid needs to be activated for to release a ball, in mS
 
-#define angleLowest 30 //The minimum allowable angle
-#define angleHighest 150 //The maximum allowable angle
+#define angleLowest 1 //The minimum allowable angle
+#define angleHighest 180 //The maximum allowable angle
 
 #define motorLevel1 255 //PWM levls for the motors
 #define motorLevel2 255
@@ -77,7 +80,8 @@ const byte motorPins[] = {
   0,pinMotor1,pinMotor2,pinMotor3}; //A map for the solenoid pins
 const byte motorLevel[] = {
   0,motorLevel1,motorLevel2,motorLevel3}; //Individual PWM signal levels for each motor
-
+char offset[] = {
+  0,offset1,offset2,offset3}; //servo offsets
 
 // Global Variables
 /*******************************************************************************************/
@@ -125,9 +129,9 @@ void setup(){
 
 
   //Attach the servo objects
-  servo1.attach(pinServo1,900,2100); //Include the maximum and minimum pulse widths.
-  servo2.attach(pinServo2,900,2100);
-  servo3.attach(pinServo3,900,2100);
+  servo1.attach(pinServo1,545,2455); //Include the maximum and minimum pulse widths.
+  servo2.attach(pinServo2,545,2455);
+  servo3.attach(pinServo3,545,2455);
 
 
   //Wait until 'Game Start' button is pressed
@@ -230,6 +234,7 @@ void executeCommand(byte shooterNum){
 
   default: //If the string isn't 's' or 'm', is it assumed ot be a number, corresponding to an angle
     setShooterAngle(shooterNum,atof(StringIn));
+    //servo1.writeMicroseconds(atof(StringIn)); //################################################################################################
   }
 }
 
@@ -257,6 +262,8 @@ void setShooterAngle(byte shooterNum, byte angle){
     Serial.println(angle);
   }
   else{
+    //Apply the angle offset
+    angle += offset[shooterNum];
     switch (shooterNum) {
     case 1:
       servo1.write(angle);
@@ -316,6 +323,7 @@ void checkSolenoids(){
     }
   }
 }
+
 
 
 
