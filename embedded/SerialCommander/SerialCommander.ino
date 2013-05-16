@@ -83,6 +83,9 @@ const byte motorLevel[] = {
 /*******************************************************************************************/
 unsigned long timer; //A multi-purpose timer
 
+char StringIn[10]; //Used to store serial characters in
+
+
 unsigned long ballReleaseTimer[4]; //Saves when the last ball was released.
 boolean ballReleasing[] = {
   0,0,0,0}; //Indicates whether we are in the process of releasing a ball
@@ -154,12 +157,13 @@ void loop(){
 void checkSerial(){
   //Check for input
   if (Serial.available()){
-    delay(1);
+    delay(100);
 
     char FirstChar=Serial.read(); //Get the first character
 
     //Get the rest of the string, except for the '=' sign
-    i=0;
+    byte i=0;
+
     Serial.read(); //Waste one character
     while (Serial.available()){
       StringIn[i++]=Serial.read();
@@ -174,19 +178,20 @@ void checkSerial(){
     case 'A':
     case 'a':
     case '1':
-      executeCommand(1,StringIn);
+
+      executeCommand(1);
       break;
 
     case 'B':
     case 'b':
     case '2':
-      executeCommand(2,StringIn);
+      executeCommand(2);
       break;
 
     case 'C':
     case 'c':
     case '3':
-      executeCommand(3,StringIn);
+      executeCommand(3);
       break;
 
     default:
@@ -197,25 +202,29 @@ void checkSerial(){
   }
 }
 
-*▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+/*▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 /*executeCommand
 /*******************************************************************************************/
 //This function executes whatever the necessary action is, as told by the command and data
 //received through serial comms
-void executeCommand(byte shooterNum, String In){
-  switch (In){
-  case "S":
-  case "s":
+void executeCommand(byte shooterNum){
+  switch (StringIn[0]){
+  case 'S':
+  case 's':
     releaseBall(shooterNum);
     break;
 
-  case "M":
-  case "m":
+  case 'M':
+  case 'm':
+    Serial.print("Turning on motor: ");
+    Serial.println(shooterNum);
     analogWrite(motorPins[shooterNum],motorLevel[shooterNum]);
     break;
 
-  case "X":
-  case "x":
+  case 'X':
+  case 'x':
+    Serial.print("Turning off motor: ");
+    Serial.println(shooterNum);
     analogWrite(motorPins[shooterNum],0);
     break;
 
@@ -243,8 +252,9 @@ void setShooterAngle(byte shooterNum, byte angle){
 
   //Set the servo output.  Use a switch statement to use the correct servo object.
   if (angle<angleLowest || angle>angleHighest) {
-    //The angle is invalid! Don't move the shooter, and send feedback
-    sendMessage(0xE2,shooterNum,angle);
+    //The angle is invalid! Don't move the shooter
+    Serial.print("Invalid angle: ");
+    Serial.println(angle);
   }
   else{
     switch (shooterNum) {
@@ -261,9 +271,6 @@ void setShooterAngle(byte shooterNum, byte angle){
 
       Serial.print("Unrecognized shooter Num: ");
       Serial.println(shooterNum);
-
-      //Send error feedback to laptop
-      sendMessage(0xE1,shooterNum);
     }
   }
 }
@@ -280,8 +287,7 @@ void releaseBall(byte shooterNum) {
   if (shooterNum<1 || shooterNum>3) { //Check that the shooter number is valid
     Serial.print("Unrecognized shooter Num: ");
     Serial.println(shooterNum);
-    //Send unrecognized shooter num feedback to laptop
-    sendMessage(0xE1,shooterNum);
+
   }
   else{
     digitalWrite(solenoidPins[shooterNum],HIGH); //Activate the solenoid: open the passage
@@ -310,6 +316,7 @@ void checkSolenoids(){
     }
   }
 }
+
 
 
 
