@@ -7,11 +7,10 @@ class Shooter:
         self.xpospx = xpos
 
         self.leftdeg = 0
-        self.centerdeg = 45
-        self.rightdeg = 90
+        self.centerdeg = 90
+        self.rightdeg = 180
 
         self.theta = 45
-        self.aimval = 128
         self.shot = 0
         self.comms = comms
         self.number = n
@@ -27,15 +26,11 @@ class Shooter:
         adj = float((self.fieldpx[1] - target[1]) + self.offsetpx)
         self.theta = self.centerdeg + math.degrees(math.atan(opp/adj))
         if self.theta <= self.leftdeg:
-            #self.theta = self.leftdeg
-            self.aimval = 1
+            self.theta = self.leftdeg
         elif self.theta >= self.rightdeg:
-            #self.theta = self.rightdeg
-            self.aimval = 128
-        else:
-            self.aimval = int((17.0/6) * self.theta)
-        print "\tT2A" + self.number + ' ' + str(self.theta)
-        return self.aimval
+            self.theta = self.rightdeg
+        print "\tready to aim" + self.number + ' at ' + str(self.theta)
+        return self.theta
 
     def get_aim_line(self, line_length = 500):
         #TODO: fix the fact that (0,0) is top left corner
@@ -55,8 +50,8 @@ class Shooter:
         return ((x1, y1), (x2, y2))
 
     def aim(self, target):
-        self.aimval = self.target2angle(target)
-        self.comms.aim(self.number, bin(self.aimval))
+        self.target2angle(target)
+        self.comms.aim(self.number, str(round((self.theta))))
 
     def fire(self):
         self.comms.fire(self.number)
