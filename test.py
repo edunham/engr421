@@ -44,6 +44,7 @@ def shooter(board):
             print shooters
     while True:
         angle = raw_input("aim to angle: ")
+        print "sending angle " + angle
         board.aim(name, angle)
         board.read()
         board.read()
