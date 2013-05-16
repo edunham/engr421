@@ -51,6 +51,7 @@
 #define pinSolenoid3 7
 
 
+
 // Parameters
 /*******************************************************************************************/
 #define DEBUG //Defining DEBUG turns ON debugging messages
@@ -59,12 +60,12 @@
 
 #define ballReleaseTime 100 //The time that the solenoid needs to be activated for to release a ball, in mS
 
-#define motorLevel1 255
-#define motorLevel2 255
-#define motorLevel3 255
-
 #define angleLowest 30 //The minimum allowable angle
 #define angleHighest 150 //The maximum allowable angle
+
+#define motorLevel1 255 //PWM levls for the motors
+#define motorLevel2 255
+#define motorLevel3 255
 
 // Libraries & Objects
 /*******************************************************************************************/
@@ -83,7 +84,8 @@ const byte solenoidPins[] = {
   0,pinSolenoid1,pinSolenoid2,pinSolenoid3}; //A map for the solenoid pins
 const byte motorPins[] = {
   0,pinMotor1,pinMotor2,pinMotor3}; //A map for the solenoid pins
-
+const byte motorLevel[] = {
+  0,motorLevel1,motorLevel2,motorLevel3}; //Individual PWM signal levels for each motor
 
 
 // Global Variables
@@ -121,7 +123,7 @@ void setup(){
     pinMode(motorPins[i],OUTPUT);
     pinMode(solenoidPins[i],OUTPUT);
 
-    analogWrite(motorPins[i],255);
+    analogWrite(motorPins[i],motorLevel[i]); //Set the PWM signal
     digitalWrite(solenoidPins[i],LOW);
   }
 
@@ -147,12 +149,6 @@ void setup(){
   //add here later
   //Send 'Game Start' message to laptop
   sendMessage(0x80);
-
-
-  //Set up the PWM DC motor control signals
-  analogWrite(pinMotor1,motorLevel1);
-  analogWrite(pinMotor2,motorLevel2);
-  analogWrite(pinMotor3,motorLevel3);
 
 
   //Prototyping stuff DELETE ME!  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -306,18 +302,19 @@ void releaseBall(byte shooterNum) {
   Serial.println(shooterNum);
 #endif
   if (shooterNum<1 || shooterNum>3) { //Check that the shooter number is valid
-    #ifdef DEBUG
-          Serial.print("Unrecognized shooter Num: ");
-          Serial.println(shooterNum);
-    #endif
-          //Send unrecognized shooter num feedback to laptop
-          sendMessage(0xE1,shooterNum);
+#ifdef DEBUG
+    Serial.print("Unrecognized shooter Num: ");
+    Serial.println(shooterNum);
+#endif
+    //Send unrecognized shooter num feedback to laptop
+    sendMessage(0xE1,shooterNum);
   }
+  else {
+    digitalWrite(solenoidPins[shooterNum],HIGH); //Activate the solenoid: open the passage
 
-  digitalWrite(solenoidPins[shooterNum],HIGH); //Activate the solenoid: open the passage
-
-  ballReleaseTimer[shooterNum]=millis()+ballReleaseTime; //Set the timer for deactivating the solenoid
-  ballReleasing[shooterNum]=1; //Indicate that we are releasing a ball
+    ballReleaseTimer[shooterNum]=millis()+ballReleaseTime; //Set the timer for deactivating the solenoid
+    ballReleasing[shooterNum]=1; //Indicate that we are releasing a ball
+  }
 }
 
 /*▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
@@ -357,4 +354,5 @@ void sendMessage (byte CMD,byte in1, byte in2, byte in3) {
   }
   Serial.println(); //Print a new line character
 }
+
 
