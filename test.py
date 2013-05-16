@@ -30,10 +30,29 @@ def errors(board):
     board.fire(bad_shooter)
     board.read()
 
+def shooter(board):
+    name = ''
+    chosen = False
+    shooters = ["left", "center", "right"]
+    while not chosen:
+        name = raw_input("which shooter? ")
+        if name in shooters:
+            chosen = True
+            print "Using shooter " + name
+        else:
+            print name + " is not a valid shooter. Use one from "
+            print shooters
+    while True:
+        angle = raw_input("aim to angle: ")
+        board.aim(name, angle)
+        board.read()
+        board.read()
+        board.read()
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print "USAGE: invoke with the name of the test you'd like to run."
-        print "\t tests available: shots, errors"
+        print "\t tests available: shots, errors, shooter"
     board = Arduino()
     board.read()
     if "shots" in sys.argv:
@@ -42,4 +61,7 @@ if __name__ == "__main__":
     if "errors" in sys.argv:
         print "TESTING: Inducing some errors:"
         errors(board)
+    if "shooter" in sys.argv:
+        print "TESTING: Interactive Shooter:"
+        shooter(board)
     print "finished testing."
