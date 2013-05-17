@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 import math
+import struct
 
 class Shooter:
     def __init__(self, offset, xpos, dpi, comms, n, field = [22.3125, 45], hit_default = True):
@@ -51,7 +52,7 @@ class Shooter:
 
     def aim(self, target):
         self.target2angle(target)
-        self.comms.aim(self.number, str(round((self.theta))))
+        self.comms.aim(self.number, struct.pack('B', (round((self.theta)))))
 
     def fire(self):
         self.comms.fire(self.number)
