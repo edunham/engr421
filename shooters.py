@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 import math
 import struct
+import time
 
 class Shooter:
     def __init__(self, offset, xpos, dpi, comms, n, field = [22.3125, 45], hit_default = True):
@@ -17,6 +18,7 @@ class Shooter:
         self.number = n
         self.fieldpx = [field[0] * dpi, field[1] * dpi]
         self.hit_default = hit_default
+        self.last_shot = time.time()
         
     def can_hit(self, target):
         return self.hit_default
@@ -30,7 +32,7 @@ class Shooter:
             self.theta = self.leftdeg
         elif self.theta >= self.rightdeg:
             self.theta = self.rightdeg
-        print "\tready to aim" + self.number + ' at ' + str(self.theta)
+        print "\tready to aim" + self.number + ' at ' + str(float(self.theta))
         return self.theta
 
     def get_aim_line(self, line_length = 500):
@@ -60,3 +62,4 @@ class Shooter:
     def shoot(self, target):
         self.aim(target)
         self.fire()
+        self.last_shot = time.time()

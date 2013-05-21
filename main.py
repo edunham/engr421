@@ -2,6 +2,7 @@
 
 import cv2
 import sys
+import time
 
 from shooters import Shooter
 from arduino import Arduino, FakeArduino
@@ -19,10 +20,12 @@ def tactical_shoot(shooters, centers):
     target = choose_center(centers)
     if target:
         for s in shooters:
-            if s.can_hit(target):
-                s.shoot(target)
-            else:
-                s.aim(target)
+            s.aim(target)
+            if time.time() > s.last_shot + 1:
+#            if s.can_hit(target):
+#                s.shoot(target)
+#            else:
+                    s.fire()
 
 def setup_shooters(board, offset_in = 1, field = [22.3125, 45], dpi = 17):
     offset = int(offset_in * dpi)
@@ -35,6 +38,7 @@ def setup_shooters(board, offset_in = 1, field = [22.3125, 45], dpi = 17):
     # right shooter centered in rightmost third of board
     right_shooter = Shooter(offset, int(wpx - sixth), dpi, board, "right", field = field, hit_default = True)
     shooterlist = [left_shooter, center_shooter, right_shooter]
+    shooterlist = [center_shooter]
     return shooterlist
 
 def main(args):

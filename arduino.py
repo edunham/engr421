@@ -12,8 +12,7 @@ class Arduino:
         else:
             print "dude, plug in the Arduino"
             exit()
-        self.ser = serial.Serial(port=devpath, baudrate=self.baudrate,
-timeout=1)
+        self.ser = serial.Serial(port=devpath, baudrate=self.baudrate, timeout=0)
         self.comms = {"aim": '\x01',
                       "fire": '\x02',
                       "GO": 'GO'}
@@ -44,11 +43,12 @@ timeout=1)
         self.ser.write(data)
 
     def read(self):
-        line = self.ser.readline()[:-1] # strip newline
-        for msg, val in self.infos.iteritems():
-            if val in line:
-                handle_message(msg, line)
-        print "\t READ: " + line
+        #line = self.ser.readline()[:-1] # strip newline
+        #for msg, val in self.infos.iteritems():
+        #    if val in line:
+        #        handle_message(msg, line)
+        #print "\t READ: " + line
+        pass
 
     def aim(self, shooter, angle):
         data = self.comms["GO"] + self.comms["aim"] + self.shooters[shooter] + angle

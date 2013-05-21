@@ -10,9 +10,12 @@ class Camera:
     def __init__(self, cam_id = 0):
         # open the camera
         cap = cv2.VideoCapture(cam_id)
+        print "frameheight"
         cap.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, 600);
+        print "frame width"
         cap.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, 800);
-        cap.set(cv2.cv.CV_CAP_PROP_FPS, 30);
+        print "fps"
+        cap.set(cv2.cv.CV_CAP_PROP_FPS, 1);
         
         self.dev_id = cam_id
         self.device = cap
