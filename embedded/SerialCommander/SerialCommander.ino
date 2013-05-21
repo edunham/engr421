@@ -52,10 +52,7 @@
 
 #define commsTimeout 200 //The maximum time that a received serial command can take, in mS
 
-#define ballReleaseTime 500 //The time that the solenoid needs to be activated for to release a ball, in mS
-
-#define angleLowest 1 //The minimum allowable angle
-#define angleHighest 180 //The maximum allowable angle
+#define ballReleaseTime 20 //The time that the solenoid needs to be activated for to release a ball, in mS
 
 #define motorLevel1 255 //PWM levls for the motors
 #define motorLevel2 255
@@ -129,7 +126,7 @@ void setup(){
 
 
   //Attach the servo objects
-  servo1.attach(pinServo1,545,2455); //Include the maximum and minimum pulse widths.
+  servo1.attach(pinServo1,530,2470); //Include the maximum and minimum pulse widths.
   servo2.attach(pinServo2,545,2455);
   servo3.attach(pinServo3,545,2455);
 
@@ -256,29 +253,23 @@ void setShooterAngle(byte shooterNum, byte angle){
 
 
   //Set the servo output.  Use a switch statement to use the correct servo object.
-  if (angle<angleLowest || angle>angleHighest) {
-    //The angle is invalid! Don't move the shooter
-    Serial.print("Invalid angle: ");
-    Serial.println(angle);
-  }
-  else{
+
     //Apply the angle offset
-    angle += offset[shooterNum];
+    int out = angle + offset[shooterNum];
     switch (shooterNum) {
     case 1:
-      servo1.write(angle);
+      servo1.write(out);
       break;
     case 2:
-      servo2.write(angle);
+      servo2.write(out);
       break;
     case 3:
-      servo1.write(angle);
+      servo3.write(out);
       break;
     default:
 
       Serial.print("Unrecognized shooter Num: ");
       Serial.println(shooterNum);
-    }
   }
 }
 
