@@ -54,7 +54,9 @@
 
 // Parameters
 /*******************************************************************************************/
-#define DEBUG 1 //Defining DEBUG turns ON debugging messages
+#define DEBUG 0 //Defining DEBUG turns ON debugging messages
+
+#define killMsgSend 1 //Prevents the arduino from sending the functional messages to the laptop
 
 #define commsTimeout 200 //The maximum time that a received serial command can take, in mS
 
@@ -354,6 +356,7 @@ void checkSolenoids(){
 /*******************************************************************************************/
 //This function sends commands to the laptop.  It has optional inputs.
 void sendMessage (byte CMD,byte in1, byte in2, byte in3) {
+#if killMsgSend==1
   Serial.print("GO");
   if (commandLength[CMD]>0){
     Serial.print(in1);
@@ -365,6 +368,7 @@ void sendMessage (byte CMD,byte in1, byte in2, byte in3) {
     }
   }
   Serial.println(); //Print a new line character
+#endif
 }
 
 
