@@ -54,11 +54,11 @@
 
 // Parameters
 /*******************************************************************************************/
-#define DEBUG //Defining DEBUG turns ON debugging messages
+#define DEBUG 1 //Defining DEBUG turns ON debugging messages
 
 #define commsTimeout 200 //The maximum time that a received serial command can take, in mS
 
-#define ballReleaseTime 100 //The time that the solenoid needs to be activated for to release a ball, in mS
+#define ballReleaseTime 20 //The time that the solenoid needs to be activated for to release a ball, in mS
 
 #define angleLowest 30 //The minimum allowable angle
 #define angleHighest 150 //The maximum allowable angle
@@ -139,7 +139,7 @@ void setup(){
   /*******************************************************************************************/
   Serial.begin(9600);
   Serial.setTimeout(commsTimeout);
-#ifdef DEBUG
+#if DEBUG==1
   Serial.println("Arduino Start");
 #endif
 
@@ -206,7 +206,7 @@ void checkSerial(){
         Serial.read(); //Remove the 'O' from the serial buffer.
         //Initialization Sequence detected!
 
-#ifdef DEBUG
+#if DEBUG==1
         Serial.println("'G O' found!");
 #endif
 
@@ -248,7 +248,7 @@ void executeCommand(){
     //Change servo angle offset
     offset[buffer[0]]=(char) buffer[1]; //Changed to a signed byte
   default:
-#ifdef DEBUG
+#if DEBUG==1
     Serial.print("Unrecognized command ID: ");
     Serial.println(commandID);
 #endif
@@ -266,7 +266,7 @@ void setShooterAngle(byte shooterNum, byte angle){
 
   //  unsigned int output =   (((unsigned int) angle-1)*137)/29+900; // 137/29 = 4.724 = 1200/254, the scaling factor to get to uS
 
-#ifdef DEBUG
+#if DEBUG==1
   Serial.print("Setting shooter ");
   Serial.print(shooterNum);
   Serial.print(" to ");
@@ -293,7 +293,7 @@ void setShooterAngle(byte shooterNum, byte angle){
       servo1.write(angle);
       break;
     default:
-#ifdef DEBUG
+#if DEBUG==1
       Serial.print("Unrecognized shooter Num: ");
       Serial.println(shooterNum);
 #endif
@@ -309,12 +309,12 @@ void setShooterAngle(byte shooterNum, byte angle){
 //This function releases one BB (hopefully) from shooter <shooterNum>
 void releaseBall(byte shooterNum) {
 
-#ifdef DEBUG
+#if DEBUG==1
   Serial.print("Releasing ball from shooter: ");
   Serial.println(shooterNum);
 #endif
   if (shooterNum<1 || shooterNum>3) { //Check that the shooter number is valid
-#ifdef DEBUG
+#if DEBUG==1
     Serial.print("Unrecognized shooter Num: ");
     Serial.println(shooterNum);
 #endif
@@ -339,7 +339,7 @@ void checkSolenoids(){
       if (millis()>ballReleaseTimer[i]){ //If enough time has passed
         digitalWrite(solenoidPins[i],LOW); //Deactivate the solenoid: close the passage
         ballReleasing[i]=0; //Indicate that the ball is no longer being released
-#ifdef DEBUG
+#if DEBUG==1
         Serial.print("Deactivating solenoid: ");
         Serial.println(i);
 #endif
