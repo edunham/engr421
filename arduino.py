@@ -13,6 +13,7 @@ class Arduino:
             print "dude, plug in the Arduino"
             exit()
         self.ser = serial.Serial(port=devpath, baudrate=self.baudrate, timeout=0)
+        self.ser.writeTimeout = 0
         self.comms = {"aim": '\x01',
                       "fire": '\x02',
                       "GO": 'GO'}
@@ -39,27 +40,31 @@ class Arduino:
 
     def send(self, data):
         # arbitrary data to board
+        self.ser.flushOutput()
         print "sending " + str(data)
         self.ser.write(data)
 
     def read(self):
-        #line = self.ser.readline()[:-1] # strip newline
-        #for msg, val in self.infos.iteritems():
-        #    if val in line:
-        #        handle_message(msg, line)
-        #print "\t READ: " + line
-        pass
+        print "READ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`"
+        if self.ser.inWaiting() > 0: # something there to read
+            line = self.ser.readline()[:-1] # strip \n
+            for msg, val in self.infos.iteritems():
+                if val in line:
+                    handle_message(msg, line)
+            print "\tREAD: " + line
+        self.ser.flushInput() # else eventual freeze
+        self.ser.flushOutput()
 
     def aim(self, shooter, angle):
         data = self.comms["GO"] + self.comms["aim"] + self.shooters[shooter] + angle
         print "\ttrying to aim " + str(shooter) + " AT " + str(angle)
-        self.ser.write(data)
+        self.send(data)
         self.read()
 
     def fire(self, shooter):
         data = self.comms["GO"] + self.comms["fire"] + self.shooters[shooter]
         print "\ttrying to fire " + str(shooter)
-        self.ser.write(data)
+        self.send(data)
         self.read()
 
 class FakeArduino:
