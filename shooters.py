@@ -4,13 +4,22 @@ import struct
 import time
 
 class Shooter:
-    def __init__(self, offset, xpos, dpi, comms, n, field = [22.3125, 45], hit_default = True):
+    def __init__(self, offset, xpos, dpi, comms, n, 
+                 field = [22.3125, 45], 
+                 hit_default = True, 
+                 board_section = (0,10)):
+
+        # how far back from the line is the pivot?
         self.offsetpx = offset
+        # how far from the left side of the board is it?
         self.xpospx = xpos
 
         self.leftdeg = 0
         self.centerdeg = 90
         self.rightdeg = 180
+
+        # (a,b) leftmost a and rightmost b where we're best to shoot
+        self.board_section = board_section
 
         self.theta = 45
         self.shot = 0
@@ -58,8 +67,8 @@ class Shooter:
 
     def fire(self):
         self.comms.fire(self.number)
+        self.last_shot = time.time()
 
     def shoot(self, target):
         self.aim(target)
         self.fire()
-        self.last_shot = time.time()
