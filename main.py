@@ -38,7 +38,6 @@ def setup_shooters(board, offset_in = 1, field = [22.3125, 45], dpi = 17):
     # right shooter centered in rightmost third of board
     right_shooter = Shooter(offset, int(wpx - sixth), dpi, board, "right", field = field, hit_default = True)
     shooterlist = [left_shooter, center_shooter, right_shooter]
-    shooterlist = [center_shooter]
     return shooterlist
 
 def main(args):
@@ -48,7 +47,7 @@ def main(args):
         board = Arduino()
     cam = Camera()
     cam.calibrate()
-    #cam.adj_thresh(2, 50)
+    cam.adj_thresh(2, 10)
     shooterlist = setup_shooters(board, offset_in = 9.5, field = cam.board_size, dpi = cam.dpi)
     while True:
         targets = cam.get_targets()

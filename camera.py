@@ -92,7 +92,7 @@ class Camera:
         old_thresh = self.threshval
         works = []
         print "auto-calibrating threshold..."
-        for t in range(100, 255, 2):
+        for t in range(140, 200, 2):
             print "\t trying " + str(t)
             self.threshval = t
             if all((len(self.get_targets()) == pucks) for x in range(stability)):
