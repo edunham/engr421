@@ -130,8 +130,9 @@ class Camera:
             cv2.circle(output, tuple(t), radius, cv2.cv.RGB(0,255,255), linewidth)
         if lines is not None:
             for l in lines:
-                print l
-                cv2.line(output, l[0], l[1], cv2.cv.RGB(255,255,0), linewidth)
+                l.print_info()
+                #cv2.line(output, l[0], l[1], cv2.cv.RGB(255,255,0), linewidth)
+                cv2.line(output, l.a, l.b, color = l.color, thickness = linewidth)
         cv2.imshow("RESULTS", output)
 
     def cleanup(self):

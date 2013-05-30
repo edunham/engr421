@@ -2,12 +2,23 @@
 import math
 import struct
 import time
+import cv2
+
+class Line:
+    def __init__(self, a, b, color):
+        self.a = a  # (x,y)
+        self.b = b  # (x,y)
+        self.color = color #cv2.cv.RGB(255,255,255)
+    def print_info(self):
+        print "\tline from " + str(self.a) + " to " + str(self.b) + " color " + str(self.color)
 
 class Shooter:
     def __init__(self, offset, xpos, dpi, comms, n, 
                  field = [22.3125, 45], 
                  hit_default = True, 
-                 board_section = (0,10)):
+                 board_section = (0,10),
+                 line_color = cv2.cv.RGB(0,255,255)
+                 ):
 
         # how far back from the line is the pivot?
         self.offsetpx = offset
@@ -28,6 +39,7 @@ class Shooter:
         self.fieldpx = [field[0] * dpi, field[1] * dpi]
         self.hit_default = hit_default
         self.last_shot = time.time()
+        self.line_color = line_color
         
     def can_hit(self, target):
         return self.hit_default
@@ -59,7 +71,7 @@ class Shooter:
         y2 = (self.fieldpx[1] - y2sub) + 2* self.offsetpx
         x2add = int((math.sin(math.radians(angle)) + fix_round_error) * line_length)
         x2 = x1 - x2add 
-        return ((x1, y1), (x2, y2))
+        return Line((x1, y1), (x2, y2), self.line_color)
 
     def aim(self, target):
         self.target2angle(target)

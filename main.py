@@ -32,11 +32,11 @@ def setup_shooters(args, board, offset_in = 1, field = [22.3125, 45], dpi = 17):
     wpx = field[0] * dpi
     sixth = int(wpx / 6)
     # left shooter centered in first third of board
-    left_shooter = Shooter(offset, sixth, dpi, board, "left", field = field, hit_default  = True)
+    left_shooter = Shooter(offset, sixth, dpi, board, "left", field = field, hit_default  = True, line_color = cv2.cv.RGB(255,0,0))
     # center shooter centered
-    center_shooter = Shooter(offset, int(wpx / 2), dpi, board, "center", field = field, hit_default = True) 
+    center_shooter = Shooter(offset, int(wpx / 2), dpi, board, "center", field = field, hit_default = True, line_color = cv2.cv.RGB(0,0,255)) 
     # right shooter centered in rightmost third of board
-    right_shooter = Shooter(offset, int(wpx - sixth), dpi, board, "right", field = field, hit_default = True)
+    right_shooter = Shooter(offset, int(wpx - sixth), dpi, board, "right", field = field, hit_default = True, line_color = cv2.cv.RGB(0,255,0))
     shooterlist = []
     if 'l' in args:
         shooterlist.append(left_shooter)
