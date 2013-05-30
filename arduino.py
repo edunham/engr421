@@ -41,11 +41,11 @@ class Arduino:
     def send(self, data):
         # arbitrary data to board
         self.ser.flushOutput()
-        print "sending " + str(data)
+        #print "sending " + str(data)
         self.ser.write(data)
 
     def read(self):
-        print "READ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`"
+        #print "READ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`"
         if self.ser.inWaiting() > 0: # something there to read
             line = self.ser.readline()[:-1] # strip \n
             for msg, val in self.infos.iteritems():
@@ -57,13 +57,13 @@ class Arduino:
 
     def aim(self, shooter, angle):
         data = self.comms["GO"] + self.comms["aim"] + self.shooters[shooter] + angle
-        print "\ttrying to aim " + str(shooter) + " AT " + str(angle)
+        #print "\ttrying to aim " + str(shooter) + " AT " + str(angle)
         self.send(data)
         self.read()
 
     def fire(self, shooter):
         data = self.comms["GO"] + self.comms["fire"] + self.shooters[shooter]
-        print "\ttrying to fire " + str(shooter)
+        #print "\ttrying to fire " + str(shooter)
         self.send(data)
         self.read()
 
@@ -78,16 +78,20 @@ class FakeArduino:
         self.infos = {"start": bin(80)}
 
     def send(self, data):
-        print "FakeArduino thinks it's sending: " + str(data)
+        #print "FakeArduino thinks it's sending: " + str(data)
+        pass
 
     def read(self):
-        print "Read an imaginary line from FakeArduino"
+        #print "Read an imaginary line from FakeArduino"
+        pass
 
     def aim(self, shooter, angle):
-        print self.comms["GO"] + self.comms["aim"] + shooter + angle
+        #print self.comms["GO"] + self.comms["aim"] + shooter + angle
+        pass
 
     def fire(self, shooter):
-        print self.comms["GO"] + self.comms["fire"] + shooter
+        #print self.comms["GO"] + self.comms["fire"] + shooter
+        pass
 
 if __name__ == "__main__":
     slave = Arduino()

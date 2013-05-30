@@ -53,7 +53,7 @@ class Shooter:
             self.theta = self.leftdeg
         elif self.theta >= self.rightdeg:
             self.theta = self.rightdeg
-        print "\tready to aim" + self.number + ' at ' + str(float(self.theta))
+        # print "\tready to aim" + self.number + ' at ' + str(float(self.theta))
         return self.theta
 
     def get_aim_line(self, line_length = 500):
