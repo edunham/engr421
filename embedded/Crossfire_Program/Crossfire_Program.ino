@@ -60,7 +60,7 @@
 
 #define commsTimeout 200 //The maximum time that a received serial command can take, in mS
 
-#define ballReleaseTime 20 //The time that the solenoid needs to be activated for to release a ball, in mS
+#define ballReleaseTime 35 //The time that the solenoid needs to be activated for to release a ball, in mS
 
 #define angleLowest 30 //The minimum allowable angle
 #define angleHighest 150 //The maximum allowable angle
@@ -69,8 +69,8 @@
 #define motorLevel2 255
 #define motorLevel3 255
 
-#define offset1 0 //offset angles for each servo
-#define offset2 0
+#define offset1 -3 //offset angles for each servo
+#define offset2 -4
 #define offset3 0
 
 // Libraries & Objects
@@ -147,9 +147,14 @@ void setup(){
 
 
   //Attach the servo objects
-  servo1.attach(pinServo1,545,2455); //Include the maximum and minimum pulse widths.
-  servo2.attach(pinServo2,545,2455);
-  servo3.attach(pinServo3,545,2455);
+  servo1.attach(pinServo1,429,2571); //Include the maximum and minimum pulse widths.
+  servo2.attach(pinServo2,429,2571);
+  servo3.attach(pinServo3,429,2571);
+  
+  //Set all servos to 90 degrees
+  servo1.write(90+offset[1]);
+  servo2.write(90+offset[2]);
+  servo3.write(90+offset[3]);
 
 
   //Wait until 'Game Start' button is pressed
@@ -203,6 +208,7 @@ void checkSerial(){
         if (millis()>timer) { //Exit the loop if we don't receive another character
           break;
         }
+        checkSolenoids(); //In case one needs to be turned off while this fn is running
       } 
       if (Serial.peek()=='O'){
         Serial.read(); //Remove the 'O' from the serial buffer.
@@ -217,6 +223,7 @@ void checkSerial(){
           if (millis()>timer) { //Exit the loop if we don't receive another character
             break;
           }
+          checkSolenoids(); //In case one needs to be turned off while this fn is running
         } 
         commandID=Serial.read(); //This byte is the command ID
 
@@ -356,7 +363,7 @@ void checkSolenoids(){
 /*******************************************************************************************/
 //This function sends commands to the laptop.  It has optional inputs.
 void sendMessage (byte CMD,byte in1, byte in2, byte in3) {
-#if killMsgSend==1
+#if killMsgSend==0
   Serial.print("GO");
   if (commandLength[CMD]>0){
     Serial.print(in1);

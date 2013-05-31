@@ -43,8 +43,8 @@
 #define pinSolenoid2 6
 #define pinSolenoid3 7
 
-#define offset1 0 //offset angles for each servo
-#define offset2 0
+#define offset1 -3 //offset angles for each servo
+#define offset2 -4
 #define offset3 0
 
 // Parameters
@@ -52,7 +52,7 @@
 
 #define commsTimeout 200 //The maximum time that a received serial command can take, in mS
 
-#define ballReleaseTime 20 //The time that the solenoid needs to be activated for to release a ball, in mS
+#define ballReleaseTime 35 //The time that the solenoid needs to be activated for to release a ball, in mS
 
 #define motorLevel1 255 //PWM levls for the motors
 #define motorLevel2 255
@@ -126,13 +126,15 @@ void setup(){
 
 
   //Attach the servo objects
-  servo1.attach(pinServo1,530,2470); //Include the maximum and minimum pulse widths.
-  servo2.attach(pinServo2,545,2455);
-  servo3.attach(pinServo3,545,2455);
+  servo1.attach(pinServo1,429,2571); //Include the maximum and minimum pulse widths.
+  servo2.attach(pinServo2,429,2571);
+  servo3.attach(pinServo3,429,2571);
 
 
-  //Wait until 'Game Start' button is pressed
-
+  //Set all servos to 90
+  servo1.write(90+offset[1]);
+  servo2.write(90+offset[2]);
+  servo3.write(90+offset[3]);
 
 }
 
@@ -250,6 +252,7 @@ void setShooterAngle(byte shooterNum, byte angle){
   Serial.print(shooterNum);
   Serial.print(" to ");
   Serial.println(angle);
+
 
 
   //Set the servo output.  Use a switch statement to use the correct servo object.
