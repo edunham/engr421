@@ -38,6 +38,7 @@
 
 // Pins
 /*******************************************************************************************/
+//Motors
 #define pinMotor1 5
 #define pinMotor2 2
 #define pinMotor3 3
@@ -50,6 +51,22 @@
 #define pinSolenoid2 6
 #define pinSolenoid3 7
 
+//Interface Panel
+#define pinPot A0
+#define pinLEDY1 26
+#define pinLEDY2 24
+#define pinLEDY3 22
+
+#define pinLEDR 30
+#define pinLEDB 32
+#define pinLEDG 28
+
+#define pinButton1 20
+#define pinButton2 19
+#define pinButton3 18
+
+#define pinConfig1 17
+#define pinConfig2 21
 
 
 // Parameters
@@ -90,10 +107,18 @@ const byte solenoidPins[] = {
   0,pinSolenoid1,pinSolenoid2,pinSolenoid3}; //A map for the solenoid pins
 const byte motorPins[] = {
   0,pinMotor1,pinMotor2,pinMotor3}; //A map for the solenoid pins
+const byte ledPinsY[] = {
+  0,pinLEDY1,pinLEDY2,pinLEDY3}; //A map for the yellow LEDs
+const byte ledPins[] = {
+  0,pinLEDR,pinLEDB,pinLEDG}; //A map for the R B and G LEDs
+const byte buttonPins[] = {
+  0,pinButton1,pinButton2,pinButton3}; //A map for the three momentary buttons
+
 const byte motorLevel[] = {
   0,motorLevel1,motorLevel2,motorLevel3}; //Individual PWM signal levels for each motor
 char offset[] = {
   0,offset1,offset2,offset3}; //servo offsets
+
 
 // Global Variables
 /*******************************************************************************************/
@@ -131,10 +156,17 @@ void setup(){
     pinMode(motorPins[i],OUTPUT);
     pinMode(solenoidPins[i],OUTPUT);
 
-    analogWrite(motorPins[i],motorLevel[i]); //Set the PWM signal
-    digitalWrite(solenoidPins[i],LOW);
+    analogWrite(motorPins[i],motorLevel[i]); //Set the PWM signal for the motor
+    digitalWrite(solenoidPins[i],LOW); //Ensure the solenoid is low
+
+    pinMode(ledPins[i],OUTPUT); //Set the LED pins as outputs
+    pinMode(ledPinsY[i],OUTPUT);
+    pinMode(buttonPins[i],INPUT_PULLUP); //Set the button pins as inputs pulled high
   }
 
+  //Set the config switch pins as inputs pulled high
+  pinMode(pinConfig1,INPUT_PULLUP);
+  pinMode(pinConfig2,INPUT_PULLUP);
 
 
   // Other Setup Code
@@ -150,15 +182,30 @@ void setup(){
   servo1.attach(pinServo1,429,2571); //Include the maximum and minimum pulse widths.
   servo2.attach(pinServo2,429,2571);
   servo3.attach(pinServo3,429,2571);
-  
+
+  //Run a test pattern on the LEDs
+  float num = 200; //mS
+  for (byte i=0;i<7;i++){
+    for (byte j=1;j<4;j++){
+      digitalWrite(ledPinsY[j],HIGH);
+      delay(round(num));
+      num=num*0.93;
+      digitalWrite(ledPinsY[j],LOW);
+    }
+    for (byte j=3;j>0;j--){
+      digitalWrite(ledPins[j],HIGH);
+      delay(round(num));
+      num=num*0.93;
+      digitalWrite(ledPins[j],LOW);
+    }
+  }
+
   //Set all servos to 90 degrees
   servo1.write(90+offset[1]);
   servo2.write(90+offset[2]);
   servo3.write(90+offset[3]);
 
-
   //Wait until 'Game Start' button is pressed
-
   //add here later
   //Send 'Game Start' message to laptop
   sendMessage(0x80);
@@ -253,7 +300,7 @@ void executeCommand(){
     //Release a ball on shooter <db1>
     releaseBall(buffer[0]);
     break;
-    case 3:
+  case 3:
     //Change servo angle offset
     offset[buffer[0]]=(char) buffer[1]; //Changed to a signed byte
   default:
@@ -263,6 +310,7 @@ void executeCommand(){
 #endif
     //Send error feedback to laptop
     sendMessage(0xE0,commandID);
+    digitalWrite(ledPinsY[1],HIGH); //Light up the error LED
   }
 }
 
@@ -285,12 +333,13 @@ void setShooterAngle(byte shooterNum, byte angle){
 
   //Set the servo output.  Use a switch statement to use the correct servo object.
   if (angle<angleLowest || angle>angleHighest) {
-    //The angle is invalid! Don't move the shooter, and send feedback
+    //The angle is invalid! Don't move the shooter, and send error feedback
     sendMessage(0xE2,shooterNum,angle);
+    digitalWrite(ledPinsY[3],HIGH); //Light up the error LED
   }
   else{
-      //Apply the angle offset
-      angle += offset[shooterNum];
+    //Apply the angle offset
+    angle += offset[shooterNum];
     switch (shooterNum) {
     case 1:
       servo1.write(angle);
@@ -308,6 +357,7 @@ void setShooterAngle(byte shooterNum, byte angle){
 #endif
       //Send unrecognized shooter num feedback to laptop
       sendMessage(0xE1,shooterNum);
+      digitalWrite(ledPinsY[2],HIGH); //Light up the error LED
     }
   }
 }
@@ -332,6 +382,7 @@ void releaseBall(byte shooterNum) {
   }
   else {
     digitalWrite(solenoidPins[shooterNum],HIGH); //Activate the solenoid: open the passage
+    digitalWrite(ledPins[shooterNum],HIGH); //Turn on the respective LED
 
     ballReleaseTimer[shooterNum]=millis()+ballReleaseTime; //Set the timer for deactivating the solenoid
     ballReleasing[shooterNum]=1; //Indicate that we are releasing a ball
@@ -347,6 +398,7 @@ void checkSolenoids(){
     if (ballReleasing[i]==1){ //If a ball is currently being released
       if (millis()>ballReleaseTimer[i]){ //If enough time has passed
         digitalWrite(solenoidPins[i],LOW); //Deactivate the solenoid: close the passage
+        digitalWrite(ledPins[i],LOW); //Turn off the respective LED
         ballReleasing[i]=0; //Indicate that the ball is no longer being released
 #if DEBUG==1
         Serial.print("Deactivating solenoid: ");
@@ -377,6 +429,10 @@ void sendMessage (byte CMD,byte in1, byte in2, byte in3) {
   Serial.println(); //Print a new line character
 #endif
 }
+
+
+
+
 
 
 
