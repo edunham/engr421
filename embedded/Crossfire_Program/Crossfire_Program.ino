@@ -53,6 +53,7 @@
 
 //Interface Panel
 #define pinPot A0
+
 #define pinLEDY1 26
 #define pinLEDY2 24
 #define pinLEDY3 22
@@ -73,11 +74,12 @@
 /*******************************************************************************************/
 #define DEBUG 0 //Defining DEBUG turns ON debugging messages
 
-#define killMsgSend 1 //Prevents the arduino from sending the functional messages to the laptop
+#define killMsgSend 0 //Prevents the arduino from sending the functional messages to the laptop
 
 #define commsTimeout 200 //The maximum time that a received serial command can take, in mS
 
 #define ballReleaseTime 35 //The time that the solenoid needs to be activated for to release a ball, in mS
+#define ballReleaseInt floor((ballReleaseTime*125)/8) //The number of 64uS needed to get to ballReleaseTime
 
 #define angleLowest 30 //The minimum allowable angle
 #define angleHighest 150 //The maximum allowable angle
@@ -114,6 +116,13 @@ const byte ledPins[] = {
 const byte buttonPins[] = {
   0,pinButton1,pinButton2,pinButton3}; //A map for the three momentary buttons
 
+const byte OCIE4[] = {
+  0, OCIE4A, OCIE4B, OCIE4C}; //A map for the locations of the output compare interrupt enable bit locations
+volatile byte *ptrOCR4H[] = {
+  0, &OCR4AH, &OCR4BH, &OCR4CH}; //Maps for the locations of the high and low output compare value byte locations
+volatile byte *ptrOCR4L[] = {
+  0, &OCR4AL, &OCR4BL, &OCR4CL};
+
 const byte motorLevel[] = {
   0,motorLevel1,motorLevel2,motorLevel3}; //Individual PWM signal levels for each motor
 char offset[] = {
@@ -139,6 +148,7 @@ boolean ballReleasing[] = {
  ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
  */
 void setup(){
+  
   // Constants
   /*******************************************************************************************/
   commandLength[1]=2;
@@ -149,7 +159,16 @@ void setup(){
   commandLength[0xE0]=1;
   commandLength[0xE1]=1;
   commandLength[0xE2]=2;
-
+  
+  // Timer Setup
+  /*******************************************************************************************/
+  //Set timer 4 to Normal mode, clock prescaler of 1024, other parameters
+  TCCR4A = B00000000;
+  TCCR4B = B00000101;
+  interrupts(); //Enable interrupts
+  //NOTE: This must be run BEFORE using delaying commangs.  If this is run after a certain
+  //amount of time, the interrupts don't function correctly.
+  
   // Pin Modes and Setup
   /*******************************************************************************************/
   for (byte i=1;i<4;i++){
@@ -183,24 +202,30 @@ void setup(){
   servo2.attach(pinServo2,429,2571);
   servo3.attach(pinServo3,429,2571);
 
+
   //Run a test pattern on the LEDs
+  
+
   float num = 200; //mS
-  for (byte i=0;i<7;i++){
-    for (byte j=1;j<4;j++){
-      digitalWrite(ledPinsY[j],HIGH);
-      delay(round(num));
+  for (byte i=0;i<6;i++){
+    for (byte z=1;z<4;z++){
+      digitalWrite(ledPinsY[z],HIGH);
+      delay(num);
       num=num*0.93;
-      digitalWrite(ledPinsY[j],LOW);
+      digitalWrite(ledPinsY[z],LOW);
     }
-    for (byte j=3;j>0;j--){
-      digitalWrite(ledPins[j],HIGH);
-      delay(round(num));
+    for (byte z=3;z>0;z--){
+      digitalWrite(ledPins[z],HIGH);
+      delay(num);
       num=num*0.93;
-      digitalWrite(ledPins[j],LOW);
+      digitalWrite(ledPins[z],LOW);
     }
   }
 
-  //Set all servos to 90 degrees
+
+
+
+    //Set all servos to 90 degrees
   servo1.write(90+offset[1]);
   servo2.write(90+offset[2]);
   servo3.write(90+offset[3]);
@@ -209,21 +234,6 @@ void setup(){
   //add here later
   //Send 'Game Start' message to laptop
   sendMessage(0x80);
-
-
-  //Prototyping stuff DELETE ME!  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  //analogWrite(pinMotor1,0);
-
-  //    releaseBall(1);
-
-  //  while (true) { //Cycle endlessly
-  //    setShooterAngle(1,90);
-  //    delay(1000);
-  //    setShooterAngle(1,45);
-  //    delay(1000);
-  //    setShooterAngle(1,135);
-  //    delay(1000);
-  //  }
 
 }
 
@@ -237,9 +247,6 @@ void setup(){
  */
 void loop(){
   checkSerial(); //Check for incoming commands, and execute them
-
-  checkSolenoids(); //Deactivates any solenoids when needed
-
 }
 
 
@@ -255,7 +262,6 @@ void checkSerial(){
         if (millis()>timer) { //Exit the loop if we don't receive another character
           break;
         }
-        checkSolenoids(); //In case one needs to be turned off while this fn is running
       } 
       if (Serial.peek()=='O'){
         Serial.read(); //Remove the 'O' from the serial buffer.
@@ -270,7 +276,6 @@ void checkSerial(){
           if (millis()>timer) { //Exit the loop if we don't receive another character
             break;
           }
-          checkSolenoids(); //In case one needs to be turned off while this fn is running
         } 
         commandID=Serial.read(); //This byte is the command ID
 
@@ -384,31 +389,14 @@ void releaseBall(byte shooterNum) {
     digitalWrite(solenoidPins[shooterNum],HIGH); //Activate the solenoid: open the passage
     digitalWrite(ledPins[shooterNum],HIGH); //Turn on the respective LED
 
-    ballReleaseTimer[shooterNum]=millis()+ballReleaseTime; //Set the timer for deactivating the solenoid
-    ballReleasing[shooterNum]=1; //Indicate that we are releasing a ball
+    //With interrupts, set the timed interrupt
+    timedInterrupt(shooterNum, ballReleaseInt); //Should be 547 for 35mS
+
+    //Below is the code before interrupts
+    //ballReleaseTimer[shooterNum]=millis()+ballReleaseTime; //Set the timer for deactivating the solenoid
+    //ballReleasing[shooterNum]=1; //Indicate that we are releasing a ball
   }
 }
-
-/*▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
-/*checkSolenoids
-/*******************************************************************************************/
-//Check whether there are any solenoids that need to be deactivated
-void checkSolenoids(){
-  for (byte i=1;i<4;i++){ //Check all 3 solenoids
-    if (ballReleasing[i]==1){ //If a ball is currently being released
-      if (millis()>ballReleaseTimer[i]){ //If enough time has passed
-        digitalWrite(solenoidPins[i],LOW); //Deactivate the solenoid: close the passage
-        digitalWrite(ledPins[i],LOW); //Turn off the respective LED
-        ballReleasing[i]=0; //Indicate that the ball is no longer being released
-#if DEBUG==1
-        Serial.print("Deactivating solenoid: ");
-        Serial.println(i);
-#endif
-      }
-    }
-  }
-}
-
 
 /*▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 /*sendMessage
@@ -430,9 +418,59 @@ void sendMessage (byte CMD,byte in1, byte in2, byte in3) {
 #endif
 }
 
+/*▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+/*timedInterrupt
+/*******************************************************************************************/
+//timerNum tells whether to use Output Compare A, B or C (for shooters 1, 2 or 3)
+//time tells the amount of time to set it for, in multiples of 62 uS. 547 gives 35mS.
+void timedInterrupt(byte timerNum, unsigned int time){
 
+  //Grab the current count from the timer
+  unsigned int count = TCNT4L; //Read the low byte first;
+  count += TCNT4H*256;
+  //Add the time we wish to find
+  count += time; //Set the the value entered
 
+  //Set the value of count into the output compare registers
+  *ptrOCR4H[timerNum] = count>>8; //High byte first
+  *ptrOCR4L[timerNum] = count; //The low byte
 
+  //Turn on interrupts for output compare on the required timer
+  TIMSK4 |= _BV(OCIE4[timerNum]);
+}
 
+/*▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+/*Timer Interrupt Service Routines
+/*******************************************************************************************/
+ISR(TIMER4_COMPA_vect){
+  //Turn off the interrupts
+  TIMSK4 &= 255 - _BV(OCIE4A);
 
+  digitalWrite(solenoidPins[1],LOW); //Deactivate the solenoid: close the BB passage
+  digitalWrite(ledPins[1],LOW); //Turn off the respective LED
+#if DEBUG==1
+  Serial.println("Deactivating solenoid: 1");
+#endif
+}
 
+ISR(TIMER4_COMPB_vect){
+  //Turn off the interrupts
+  TIMSK4 &= 255 - _BV(OCIE4B);
+
+  digitalWrite(solenoidPins[2],LOW); //Deactivate the solenoid: close the BB passage
+  digitalWrite(ledPins[2],LOW); //Turn off the respective LED
+#if DEBUG==1
+  Serial.println("Deactivating solenoid: 2");
+#endif
+}
+
+ISR(TIMER4_COMPC_vect){
+  //Turn off the interrupts
+  TIMSK4 &= 255 - _BV(OCIE4C);
+
+  digitalWrite(solenoidPins[3],LOW); //Deactivate the solenoid: close the BB passage
+  digitalWrite(ledPins[3],LOW); //Turn off the respective LED
+#if DEBUG==1
+  Serial.println("Deactivating solenoid: 3");
+#endif
+}
