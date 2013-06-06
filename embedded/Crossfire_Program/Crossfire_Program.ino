@@ -72,7 +72,7 @@
 
 // Parameters
 /*******************************************************************************************/
-#define DEBUG 0 //Defining DEBUG turns ON debugging messages
+#define DEBUG 1 //Defining DEBUG turns ON debugging messages
 
 #define killMsgSend 0 //Prevents the arduino from sending the functional messages to the laptop
 
@@ -122,6 +122,9 @@ volatile byte *ptrOCR4H[] = {
   0, &OCR4AH, &OCR4BH, &OCR4CH}; //Maps for the locations of the high and low output compare value byte locations
 volatile byte *ptrOCR4L[] = {
   0, &OCR4AL, &OCR4BL, &OCR4CL};
+volatile boolean buttonPressed[] = {
+  0, 0, 0, 0};
+unsigned long lastButtonPress; //Saves the last time that a button was pressed
 
 const byte motorLevel[] = {
   0,motorLevel1,motorLevel2,motorLevel3}; //Individual PWM signal levels for each motor
@@ -148,7 +151,7 @@ boolean ballReleasing[] = {
  ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
  */
 void setup(){
-  
+
   // Constants
   /*******************************************************************************************/
   commandLength[1]=2;
@@ -159,7 +162,7 @@ void setup(){
   commandLength[0xE0]=1;
   commandLength[0xE1]=1;
   commandLength[0xE2]=2;
-  
+
   // Timer Setup
   /*******************************************************************************************/
   //Set timer 4 to Normal mode, clock prescaler of 1024, other parameters
@@ -168,7 +171,7 @@ void setup(){
   interrupts(); //Enable interrupts
   //NOTE: This must be run BEFORE using delaying commangs.  If this is run after a certain
   //amount of time, the interrupts don't function correctly.
-  
+
   // Pin Modes and Setup
   /*******************************************************************************************/
   for (byte i=1;i<4;i++){
@@ -187,6 +190,11 @@ void setup(){
   pinMode(pinConfig1,INPUT_PULLUP);
   pinMode(pinConfig2,INPUT_PULLUP);
 
+  // Button Interrupts
+  /*******************************************************************************************/
+  attachInterrupt(3,ISR_B1,LOW); //Pin 20
+  attachInterrupt(4,ISR_B2,LOW); //Pin 19
+  attachInterrupt(5,ISR_B3,LOW); //Pin 18
 
   // Other Setup Code
   /*******************************************************************************************/
@@ -204,7 +212,7 @@ void setup(){
 
 
   //Run a test pattern on the LEDs
-  
+
 
   float num = 200; //mS
   for (byte i=0;i<6;i++){
@@ -225,7 +233,7 @@ void setup(){
 
 
 
-    //Set all servos to 90 degrees
+  //Set all servos to 90 degrees
   servo1.write(90+offset[1]);
   servo2.write(90+offset[2]);
   servo3.write(90+offset[3]);
@@ -239,7 +247,7 @@ void setup(){
 
 
 /*
-▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
  ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
  // Loop
  ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
@@ -247,9 +255,28 @@ void setup(){
  */
 void loop(){
   checkSerial(); //Check for incoming commands, and execute them
+
+
+checkButtons();
+
 }
 
-
+/*▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+/*checkButtons
+/*******************************************************************************************/
+void checkButtons(){
+   for (byte i=1; i<4; i++) {
+    if (buttonPressed[i]==1) {
+      buttonPressed[i]=0;
+       //Only accept the button press if there hasn't been one in the last 100mS
+      if ((millis()-lastButtonPress)>100){
+        lastButtonPress=millis();
+        //Perform Action Here
+        releaseBall(i);
+      }
+    }
+  } 
+}
 /*▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 /*checkSerial
 /*******************************************************************************************/
@@ -474,3 +501,20 @@ ISR(TIMER4_COMPC_vect){
   Serial.println("Deactivating solenoid: 3");
 #endif
 }
+
+
+/*▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+/*Button Interrupt Service Routines
+/*******************************************************************************************/
+void ISR_B1(){
+  buttonPressed[1]=1;
+}
+
+void ISR_B2(){
+  buttonPressed[2]=1;
+}
+
+void ISR_B3(){
+  buttonPressed[3]=1;
+}
+

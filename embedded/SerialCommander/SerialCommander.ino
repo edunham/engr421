@@ -31,6 +31,7 @@
 
 // Pins
 /*******************************************************************************************/
+//Motors
 #define pinMotor1 5
 #define pinMotor2 2
 #define pinMotor3 3
@@ -43,9 +44,24 @@
 #define pinSolenoid2 6
 #define pinSolenoid3 7
 
-#define offset1 -3 //offset angles for each servo
-#define offset2 -4
-#define offset3 0
+//Interface Panel
+#define pinPot A0
+
+#define pinLEDY1 26
+#define pinLEDY2 24
+#define pinLEDY3 22
+
+#define pinLEDR 30
+#define pinLEDB 32
+#define pinLEDG 28
+
+#define pinButton1 20
+#define pinButton2 19
+#define pinButton3 18
+
+#define pinConfig1 17
+#define pinConfig2 21
+
 
 // Parameters
 /*******************************************************************************************/
@@ -57,6 +73,11 @@
 #define motorLevel1 255 //PWM levls for the motors
 #define motorLevel2 255
 #define motorLevel3 255
+
+#define offset1 -3 //offset angles for each servo
+#define offset2 -4
+#define offset3 0
+
 
 // Libraries & Objects
 /*******************************************************************************************/
@@ -75,6 +96,14 @@ const byte solenoidPins[] = {
   0,pinSolenoid1,pinSolenoid2,pinSolenoid3}; //A map for the solenoid pins
 const byte motorPins[] = {
   0,pinMotor1,pinMotor2,pinMotor3}; //A map for the solenoid pins
+  
+const byte ledPinsY[] = {
+  0,pinLEDY1,pinLEDY2,pinLEDY3}; //A map for the yellow LEDs
+const byte ledPins[] = {
+  0,pinLEDR,pinLEDB,pinLEDG}; //A map for the R B and G LEDs
+const byte buttonPins[] = {
+  0,pinButton1,pinButton2,pinButton3}; //A map for the three momentary buttons
+  
 const byte motorLevel[] = {
   0,motorLevel1,motorLevel2,motorLevel3}; //Individual PWM signal levels for each motor
 char offset[] = {
@@ -91,6 +120,11 @@ unsigned long ballReleaseTimer[4]; //Saves when the last ball was released.
 boolean ballReleasing[] = {
   0,0,0,0}; //Indicates whether we are in the process of releasing a ball
 
+//For button pressing:
+volatile boolean buttonPressed[] = {
+  0, 0, 0, 0};
+unsigned long lastButtonPress; //Saves the last time that a button was pressed
+
 /*
 ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
  ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
@@ -100,18 +134,32 @@ boolean ballReleasing[] = {
  */
 void setup(){
 
+
   // Pin Modes and Setup
   /*******************************************************************************************/
   for (byte i=1;i<4;i++){
     pinMode(motorPins[i],OUTPUT);
     pinMode(solenoidPins[i],OUTPUT);
 
-    analogWrite(motorPins[i],motorLevel[i]);
-    digitalWrite(solenoidPins[i],LOW);
+    analogWrite(motorPins[i],motorLevel[i]); //Set the PWM signal for the motor
+    digitalWrite(solenoidPins[i],LOW); //Ensure the solenoid is low
+
+    pinMode(ledPins[i],OUTPUT); //Set the LED pins as outputs
+    pinMode(ledPinsY[i],OUTPUT);
+    pinMode(buttonPins[i],INPUT_PULLUP); //Set the button pins as inputs pulled high
   }
 
+  //Set the config switch pins as inputs pulled high
+  pinMode(pinConfig1,INPUT_PULLUP);
+  pinMode(pinConfig2,INPUT_PULLUP);
 
 
+  // Button Interrupts
+  /*******************************************************************************************/
+  attachInterrupt(3,ISR_B1,LOW); //Pin 20
+  attachInterrupt(4,ISR_B2,LOW); //Pin 19
+  attachInterrupt(5,ISR_B3,LOW); //Pin 18
+  
   // Other Setup Code
   /*******************************************************************************************/
   Serial.begin(9600);
@@ -136,6 +184,7 @@ void setup(){
   servo2.write(90+offset[2]);
   servo3.write(90+offset[3]);
 
+  interrupts(); //Allow interrupts
 }
 
 
@@ -150,6 +199,8 @@ void loop(){
   checkSerial(); //Check for incoming commands, and execute them
 
   checkSolenoids(); //Deactivates any solenoids when needed
+  
+  checkButtons(); //Check if any actions need to be performed based on buttons pressed
 
 }
 
@@ -318,8 +369,37 @@ void checkSolenoids(){
   }
 }
 
+/*▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+/*checkButtons
+/*******************************************************************************************/
+void checkButtons(){
+   for (byte i=1; i<4; i++) {
+    if (buttonPressed[i]==1) {
+      buttonPressed[i]=0;
+       //Only accept the button press if there hasn't been one in the last 100mS
+      if ((millis()-lastButtonPress)>100){
+        lastButtonPress=millis();
+        //Perform Action Here
+        releaseBall(i);
+      }
+    }
+  } 
+}
 
+/*▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+/*Button Interrupt Service Routines
+/*******************************************************************************************/
+void ISR_B1(){
+  buttonPressed[1]=1;
+}
 
+void ISR_B2(){
+  buttonPressed[2]=1;
+}
+
+void ISR_B3(){
+  buttonPressed[3]=1;
+}
 
 
 
