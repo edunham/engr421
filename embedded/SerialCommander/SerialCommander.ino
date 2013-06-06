@@ -68,7 +68,9 @@
 
 #define commsTimeout 200 //The maximum time that a received serial command can take, in mS
 
-#define ballReleaseTime 35 //The time that the solenoid needs to be activated for to release a ball, in mS
+#define ballReleaseTime1 35 //The time that the solenoid needs to be activated for to release a ball, in mS
+#define ballReleaseTime2 28
+#define ballReleaseTime3 35
 
 #define motorLevel1 255 //PWM levls for the motors
 #define motorLevel2 255
@@ -103,11 +105,13 @@ const byte ledPins[] = {
   0,pinLEDR,pinLEDB,pinLEDG}; //A map for the R B and G LEDs
 const byte buttonPins[] = {
   0,pinButton1,pinButton2,pinButton3}; //A map for the three momentary buttons
-  
 const byte motorLevel[] = {
   0,motorLevel1,motorLevel2,motorLevel3}; //Individual PWM signal levels for each motor
+const unsigned int ballReleaseTime[] = {
+  0, ballReleaseTime1, ballReleaseTime2, ballReleaseTime3};
 char offset[] = {
   0,offset1,offset2,offset3}; //servo offsets
+  
 
 // Global Variables
 /*******************************************************************************************/
@@ -344,7 +348,7 @@ void releaseBall(byte shooterNum) {
   else{
     digitalWrite(solenoidPins[shooterNum],HIGH); //Activate the solenoid: open the passage
 
-    ballReleaseTimer[shooterNum]=millis()+ballReleaseTime; //Set the timer for deactivating the solenoid
+    ballReleaseTimer[shooterNum]=millis()+ballReleaseTime[shooterNum]; //Set the timer for deactivating the solenoid
     ballReleasing[shooterNum]=1; //Indicate that we are releasing a ball
   }
 }

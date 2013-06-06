@@ -70,7 +70,7 @@
 #define pinConfig2 21
 
 
-// Parameters
+// Programmable Parameters
 /*******************************************************************************************/
 #define DEBUG 1 //Defining DEBUG turns ON debugging messages
 
@@ -78,8 +78,12 @@
 
 #define commsTimeout 200 //The maximum time that a received serial command can take, in mS
 
-#define ballReleaseTime 35 //The time that the solenoid needs to be activated for to release a ball, in mS
-#define ballReleaseInt floor((ballReleaseTime*125)/8) //The number of 64uS needed to get to ballReleaseTime
+#define ballReleaseTime1 35 //The time that the solenoid needs to be activated for to release a ball, in mS
+#define ballReleaseTime2 28
+#define ballReleaseTime3 35
+
+//#define ballReleaseInt floor((ballReleaseTime1*125)/8) //The number of 64uS needed to get to ballReleaseTime
+
 
 #define angleLowest 30 //The minimum allowable angle
 #define angleHighest 150 //The maximum allowable angle
@@ -128,6 +132,9 @@ unsigned long lastButtonPress; //Saves the last time that a button was pressed
 
 const byte motorLevel[] = {
   0,motorLevel1,motorLevel2,motorLevel3}; //Individual PWM signal levels for each motor
+#define mStoInt(x) ((unsigned int) floor((x*125)/8)) //The number of 64uS needed to get to ballReleaseTime
+const unsigned int ballReleaseInt[] = {
+  0, mStoInt(ballReleaseTime1), mStoInt(ballReleaseTime2), mStoInt(ballReleaseTime3)};
 char offset[] = {
   0,offset1,offset2,offset3}; //servo offsets
 
@@ -257,7 +264,7 @@ void loop(){
   checkSerial(); //Check for incoming commands, and execute them
 
 
-checkButtons();
+  checkButtons();
 
 }
 
@@ -265,10 +272,10 @@ checkButtons();
 /*checkButtons
 /*******************************************************************************************/
 void checkButtons(){
-   for (byte i=1; i<4; i++) {
+  for (byte i=1; i<4; i++) {
     if (buttonPressed[i]==1) {
       buttonPressed[i]=0;
-       //Only accept the button press if there hasn't been one in the last 100mS
+      //Only accept the button press if there hasn't been one in the last 100mS
       if ((millis()-lastButtonPress)>100){
         lastButtonPress=millis();
         //Perform Action Here
@@ -417,12 +424,32 @@ void releaseBall(byte shooterNum) {
     digitalWrite(ledPins[shooterNum],HIGH); //Turn on the respective LED
 
     //With interrupts, set the timed interrupt
-    timedInterrupt(shooterNum, ballReleaseInt); //Should be 547 for 35mS
-
-    //Below is the code before interrupts
-    //ballReleaseTimer[shooterNum]=millis()+ballReleaseTime; //Set the timer for deactivating the solenoid
-    //ballReleasing[shooterNum]=1; //Indicate that we are releasing a ball
+    timedInterrupt(shooterNum, ballReleaseInt[shooterNum]); //Should be 547 for 35mS
   }
+}
+
+
+/*▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+/*timedInterrupt
+/*******************************************************************************************/
+//timerNum tells whether to use Output Compare A, B or C (for shooters 1, 2 or 3)
+//time tells the amount of time to set it for, in multiples of 62 uS. 547 gives 35mS.
+void timedInterrupt(byte timerNum, unsigned int time){
+
+  //Grab the current count from the timer
+  unsigned int count = TCNT4L; //Read the low byte first;
+  count += TCNT4H*256;
+  //Add the time we wish to find
+  
+  count += time; //Set the the value entered
+
+  //Set the value of count into the output compare registers
+  *ptrOCR4H[timerNum] = count>>8; //High byte first
+  *ptrOCR4L[timerNum] = count; //The low byte
+
+  //Turn on interrupts for output compare on the required timer
+  TIMSK4 |= _BV(OCIE4[timerNum]);
+
 }
 
 /*▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
@@ -443,27 +470,6 @@ void sendMessage (byte CMD,byte in1, byte in2, byte in3) {
   }
   Serial.println(); //Print a new line character
 #endif
-}
-
-/*▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
-/*timedInterrupt
-/*******************************************************************************************/
-//timerNum tells whether to use Output Compare A, B or C (for shooters 1, 2 or 3)
-//time tells the amount of time to set it for, in multiples of 62 uS. 547 gives 35mS.
-void timedInterrupt(byte timerNum, unsigned int time){
-
-  //Grab the current count from the timer
-  unsigned int count = TCNT4L; //Read the low byte first;
-  count += TCNT4H*256;
-  //Add the time we wish to find
-  count += time; //Set the the value entered
-
-  //Set the value of count into the output compare registers
-  *ptrOCR4H[timerNum] = count>>8; //High byte first
-  *ptrOCR4L[timerNum] = count; //The low byte
-
-  //Turn on interrupts for output compare on the required timer
-  TIMSK4 |= _BV(OCIE4[timerNum]);
 }
 
 /*▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
@@ -517,4 +523,5 @@ void ISR_B2(){
 void ISR_B3(){
   buttonPressed[3]=1;
 }
+
 
