@@ -112,8 +112,11 @@ class Camera:
             if cv2.contourArea(c) < self.puck_min_px:
                 # reduce false positives
                 continue
-            center = (moments['m10']/moments['m00'], moments['m01']/moments['m00'])
+            else:
+                break
+            center = [moments['m10']/moments['m00'], moments['m01']/moments['m00']]
             center = map(lambda x: int(round(x)), center) # float to integer
+            center.append(cv2.coutourArea(c)) # store puck size
             centers.append(center)
         self.targets = centers
         return centers
