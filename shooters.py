@@ -29,7 +29,7 @@ class Shooter:
         self.centerdeg = 90
         self.rightdeg = 180
 
-        # (a,b) leftmost a and rightmost b where we're best to shoot
+        # (a,b) leftmost a and rightmost b where we're best to shoot, PX
         self.board_section = board_section
 
         self.theta = 45
@@ -42,6 +42,12 @@ class Shooter:
         self.line_color = line_color
         
     def can_hit(self, target):
+        return self.hit_default
+
+    def should_hit(self, target):
+        return self.hit_default
+
+    def must_hit(self, target):
         return self.hit_default
 
     def target2angle(self, target):
