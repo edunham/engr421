@@ -62,7 +62,6 @@
 #define pinConfig1 17
 #define pinConfig2 21
 
-
 // Parameters
 /*******************************************************************************************/
 
@@ -70,11 +69,11 @@
 
 #define ballReleaseTime1 35 //The time that the solenoid needs to be activated for to release a ball, in mS
 #define ballReleaseTime2 28
-#define ballReleaseTime3 35
+#define ballReleaseTime3 24
 
-#define motorLevel1 255 //PWM levls for the motors
-#define motorLevel2 255
-#define motorLevel3 255
+#define motorLevel1 189 //PWM levls for the motors
+#define motorLevel2 185
+#define motorLevel3 187
 
 #define offset1 -3 //offset angles for each servo
 #define offset2 -4
@@ -98,7 +97,7 @@ const byte solenoidPins[] = {
   0,pinSolenoid1,pinSolenoid2,pinSolenoid3}; //A map for the solenoid pins
 const byte motorPins[] = {
   0,pinMotor1,pinMotor2,pinMotor3}; //A map for the solenoid pins
-  
+
 const byte ledPinsY[] = {
   0,pinLEDY1,pinLEDY2,pinLEDY3}; //A map for the yellow LEDs
 const byte ledPins[] = {
@@ -111,7 +110,7 @@ const unsigned int ballReleaseTime[] = {
   0, ballReleaseTime1, ballReleaseTime2, ballReleaseTime3};
 char offset[] = {
   0,offset1,offset2,offset3}; //servo offsets
-  
+
 
 // Global Variables
 /*******************************************************************************************/
@@ -163,7 +162,7 @@ void setup(){
   attachInterrupt(3,ISR_B1,LOW); //Pin 20
   attachInterrupt(4,ISR_B2,LOW); //Pin 19
   attachInterrupt(5,ISR_B3,LOW); //Pin 18
-  
+
   // Other Setup Code
   /*******************************************************************************************/
   Serial.begin(9600);
@@ -203,7 +202,7 @@ void loop(){
   checkSerial(); //Check for incoming commands, and execute them
 
   checkSolenoids(); //Deactivates any solenoids when needed
-  
+
   checkButtons(); //Check if any actions need to be performed based on buttons pressed
 
 }
@@ -288,7 +287,16 @@ void executeCommand(byte shooterNum){
 
   default: //If the string isn't 's' or 'm', is it assumed ot be a number, corresponding to an angle
     setShooterAngle(shooterNum,atof(StringIn));
-    //servo1.writeMicroseconds(atof(StringIn)); //################################################################################################
+
+    //To change the motor level isntead of the servo angle:
+    /*
+    analogWrite(motorPins[shooterNum],atof(StringIn)); // #############################################################################
+    Serial.print("Motor ");
+    Serial.print(shooterNum);
+    Serial.print(" set to ");
+    Serial.println(atof(StringIn));
+*/
+
   }
 }
 
@@ -312,22 +320,22 @@ void setShooterAngle(byte shooterNum, byte angle){
 
   //Set the servo output.  Use a switch statement to use the correct servo object.
 
-    //Apply the angle offset
-    int out = angle + offset[shooterNum];
-    switch (shooterNum) {
-    case 1:
-      servo1.write(out);
-      break;
-    case 2:
-      servo2.write(out);
-      break;
-    case 3:
-      servo3.write(out);
-      break;
-    default:
+  //Apply the angle offset
+  int out = angle + offset[shooterNum];
+  switch (shooterNum) {
+  case 1:
+    servo1.write(out);
+    break;
+  case 2:
+    servo2.write(out);
+    break;
+  case 3:
+    servo3.write(out);
+    break;
+  default:
 
-      Serial.print("Unrecognized shooter Num: ");
-      Serial.println(shooterNum);
+    Serial.print("Unrecognized shooter Num: ");
+    Serial.println(shooterNum);
   }
 }
 
@@ -377,10 +385,10 @@ void checkSolenoids(){
 /*checkButtons
 /*******************************************************************************************/
 void checkButtons(){
-   for (byte i=1; i<4; i++) {
+  for (byte i=1; i<4; i++) {
     if (buttonPressed[i]==1) {
       buttonPressed[i]=0;
-       //Only accept the button press if there hasn't been one in the last 100mS
+      //Only accept the button press if there hasn't been one in the last 100mS
       if ((millis()-lastButtonPress)>100){
         lastButtonPress=millis();
         //Perform Action Here
@@ -404,6 +412,7 @@ void ISR_B2(){
 void ISR_B3(){
   buttonPressed[3]=1;
 }
+
 
 
 

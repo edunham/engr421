@@ -70,6 +70,9 @@
 #define pinConfig2 21
 
 
+//Arbiter
+#define pinArbiter 52
+
 // Programmable Parameters
 /*******************************************************************************************/
 #define DEBUG 1 //Defining DEBUG turns ON debugging messages
@@ -80,7 +83,7 @@
 
 #define ballReleaseTime1 35 //The time that the solenoid needs to be activated for to release a ball, in mS
 #define ballReleaseTime2 28
-#define ballReleaseTime3 35
+#define ballReleaseTime3 24
 
 //#define ballReleaseInt floor((ballReleaseTime1*125)/8) //The number of 64uS needed to get to ballReleaseTime
 
@@ -88,9 +91,9 @@
 #define angleLowest 30 //The minimum allowable angle
 #define angleHighest 150 //The maximum allowable angle
 
-#define motorLevel1 255 //PWM levls for the motors
-#define motorLevel2 255
-#define motorLevel3 255
+#define motorLevel1 189 //PWM levls for the motors
+#define motorLevel2 185
+#define motorLevel3 187
 
 #define offset1 -3 //offset angles for each servo
 #define offset2 -4
@@ -196,6 +199,7 @@ void setup(){
   //Set the config switch pins as inputs pulled high
   pinMode(pinConfig1,INPUT_PULLUP);
   pinMode(pinConfig2,INPUT_PULLUP);
+  pinMode(pinArbiter,INPUT_PULLUP);
 
   // Button Interrupts
   /*******************************************************************************************/
@@ -245,10 +249,20 @@ void setup(){
   servo2.write(90+offset[2]);
   servo3.write(90+offset[3]);
 
-  //Wait until 'Game Start' button is pressed
-  //add here later
+  //Wait until 'Game Start' signal is sent from the arbiter
+#if DEBUG==1
+  Serial.println("Waiting for arbiter to activate");
+#endif
+  while(digitalRead(pinArbiter)==HIGH){  //Wait until the pin goes low
+    while (Serial.available()) {
+      Serial.read(); //Clear any serial characters.
+    }
+  }
   //Send 'Game Start' message to laptop
   sendMessage(0x80);
+#if DEBUG==1
+  Serial.println("GAME START received");
+#endif
 
 }
 
@@ -265,6 +279,24 @@ void loop(){
 
 
   checkButtons();
+
+
+  //Check if the arbiter has signalled that the game is over
+  if(digitalRead(pinArbiter)==HIGH){
+    sendMessage(0x81);
+#if DEBUG==1
+    Serial.println("GAME STOP received");
+#endif
+    while(digitalRead(pinArbiter)==HIGH){
+      while (Serial.available()) {
+        Serial.read(); //Clear any serial characters.
+      }
+    } //Wait until the pin goes low
+    sendMessage(0x80);
+#if DEBUG==1
+    Serial.println("GAME START received");
+#endif
+  }
 
 }
 
@@ -440,7 +472,7 @@ void timedInterrupt(byte timerNum, unsigned int time){
   unsigned int count = TCNT4L; //Read the low byte first;
   count += TCNT4H*256;
   //Add the time we wish to find
-  
+
   count += time; //Set the the value entered
 
   //Set the value of count into the output compare registers
@@ -523,5 +555,8 @@ void ISR_B2(){
 void ISR_B3(){
   buttonPressed[3]=1;
 }
+
+
+
 
 
