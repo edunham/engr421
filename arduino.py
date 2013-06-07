@@ -40,18 +40,20 @@ class Arduino:
 
     def send(self, data):
         # arbitrary data to board
-        self.ser.flushOutput()
+        #self.ser.flushOutput()
         #print "sending " + str(data)
         self.ser.write(data)
 
     def read(self):
         #print "READ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`"
-        if self.ser.inWaiting() > 0: # something there to read
+        prefix = "\tREAD:"
+        while self.ser.inWaiting() > 0: # something there to read
             line = self.ser.readline()[:-1] # strip \n
             for msg, val in self.infos.iteritems():
                 if val in line:
                     handle_message(msg, line)
-            print "\tREAD: " + line
+            print prefix + line
+            prefix = "\t\t"
         self.ser.flushInput() # else eventual freeze
         self.ser.flushOutput()
 
