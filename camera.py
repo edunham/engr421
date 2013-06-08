@@ -112,11 +112,11 @@ class Camera:
             if cv2.contourArea(c) < self.puck_min_px:
                 # reduce false positives
                 continue
-            else:
-                break
-            center = [moments['m10']/moments['m00'], moments['m01']/moments['m00']]
+            #else:
+            #    break
+            center = (moments['m10']/moments['m00'], moments['m01']/moments['m00'])
             center = map(lambda x: int(round(x)), center) # float to integer
-            center.append(cv2.coutourArea(c)) # store puck size
+            #center.append(cv2.coutourArea(c)) # store puck size
             centers.append(center)
         self.targets = centers
         return centers
@@ -128,10 +128,10 @@ class Camera:
         linewidth = 2
         radius = 20
         for t in self.targets:
+            print t
             cv2.circle(output, tuple(t), radius, cv2.cv.RGB(0,255,255), linewidth)
         if lines is not None:
             for l in lines:
-                #l.print_info()
                 cv2.line(output, l.a, l.b, color = l.color, thickness = linewidth)
         cv2.imshow("RESULTS", output)
 
