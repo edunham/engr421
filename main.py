@@ -5,7 +5,7 @@ import sys
 import time
 
 from shooters import Shooter
-from arduino import Arduino, FakeArduino
+from arduino import Arduino, FakeArduino, SerialCommander
 from camera import Camera
 
 def choose_center(centers):
@@ -86,16 +86,17 @@ def setup_shooters(args, board, offset_in = 1, field = [22.3125, 45], dpi = 17):
         shooterlist.append(right_shooter)
     if 'c' in args or shooterlist == []:
         shooterlist.append(center_shooter)
+    print shooterlist
     return shooterlist
 
 def main(args):
     if "fake" in args:
         board = FakeArduino()
     else:
-        board = Arduino()
+        board = SerialCommander()
     cam = Camera()
     cam.calibrate()
-    cam.adj_thresh(2, 10)
+    #cam.adj_thresh(2, 10)
     shooterlist = setup_shooters(args, board, offset_in = 9.5, field = cam.board_size, dpi = cam.dpi)
     while True:
         targets = cam.get_targets()
