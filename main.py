@@ -7,6 +7,7 @@ import time
 from shooters import Shooter
 from arduino import Arduino, FakeArduino, SerialCommander
 from camera import Camera
+from field import Field
 
 def choose_center(centers):
     if centers == []:
@@ -26,24 +27,6 @@ def tactical_shoot(shooters, centers):
 #                s.shoot(target)
 #            else:
                     s.fire()
-"""
-def differentiate(centers):
-    # returns (larger, smaller) if 2 pucks else False
-    if len(centers) != 2:
-        return False
-    if centers[0][2] > centers[1][2]:
-        return (centers[0], centers[1])
-    else:
-        return (centers[1], centers[0])
-
-def differentiate_shoot(shooters, centers):
-    # find the two pucks or and 
-    d = differentiate(centers)
-    if d:
-        triangle, star = d
-    else:
-        return
-""" 
 
 def setup_shooters(args, board, offset_in = 1, field = [22.3125, 45], dpi = 17):
     offset = int(offset_in * dpi)
@@ -98,13 +81,31 @@ def main(args):
     cam.calibrate()
     #cam.adj_thresh(2, 10)
     shooterlist = setup_shooters(args, board, offset_in = 9.5, field = cam.board_size, dpi = cam.dpi)
-    while True:
-        targets = cam.get_targets()
-        tactical_shoot(shooterlist, targets)
-        aims = [s.get_aim_line() for s in shooterlist]
-        cam.display(aims) 
-        if (cv2.waitKey(2) >= 0):
-            break
+    if "old" in args:
+        while True:
+            targets = cam.get_targets()
+            tactical_shoot(shooterlist, targets)
+            aims = [s.get_aim_line() for s in shooterlist]
+            cam.display(aims) 
+            if (cv2.waitKey(2) >= 0):
+                break
+    elif "new" in args:
+        field = Field()
+        while True:
+            pucks = cam.get_pucks()
+            if not pucks:
+                pucks = (cam.get_one())
+            if not pucks:
+                continue
+            field.update_pucks(pucks)
+            target = field.get_best_target_pos()
+            for s in shooterlist:
+                if s.can_hit(one):
+                    s.shoot(one)
+            aims = [s.get_aim_line() for s in shooterlist]
+            cam.display(aims)
+            if cv.waitKey(2) >= 0:
+                break
     cam.cleanup()
 
 if __name__ == "__main__":
