@@ -33,7 +33,7 @@ class Shooter:
         self.board_section = board_section
 
         self.theta = 45
-        self.shot = 0
+        self.shots = 50
         self.comms = comms
         self.number = n
         self.fieldpx = [field[0] * dpi, field[1] * dpi]
@@ -42,7 +42,9 @@ class Shooter:
         self.line_color = line_color
         
     def can_hit(self, target):
-        return self.hit_default
+        if self.shots > 0:
+            return self.hit_default
+        return False
 
     def should_hit(self, target):
         return self.hit_default
@@ -86,6 +88,7 @@ class Shooter:
     def fire(self):
         self.comms.fire(self.number)
         self.last_shot = time.time()
+        self.shots -= 1
 
     def shoot(self, target):
         self.aim(target)

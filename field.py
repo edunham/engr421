@@ -55,10 +55,10 @@ class Field():
         Yields false if neither puck is still in the game.
         """
         if self.triangle_state is "in" and self.star_state is "in":
-            if self.triangle_pos[1] < self.magic_far_distance or self.triangle_pos[1] > magic_near_distance:
+            if self.triangle_pos[1] < self.magic_far_distance or self.triangle_pos[1] > self.magic_near_distance:
                 # triangle first, assuming it takes more hits to move it
                 return self.triangle_pos
-            if self.star_pos[1] < self.magic_far_distance or self.star_pos[1] > magic_near_distance:
+            if self.star_pos[1] < self.magic_far_distance or self.star_pos[1] > self.magic_near_distance:
                 return self.star_pos
             return self.star_pos
         if self.triangle_state is not "in":

@@ -100,11 +100,11 @@ def main(args):
             field.update_pucks(pucks)
             target = field.get_best_target_pos()
             for s in shooterlist:
-                if s.can_hit(one):
-                    s.shoot(one)
+                if s.can_hit(target):
+                    s.shoot(target)
             aims = [s.get_aim_line() for s in shooterlist]
             cam.display(aims)
-            if cv.waitKey(2) >= 0:
+            if cv2.waitKey(2) >= 0:
                 break
     cam.cleanup()
 
