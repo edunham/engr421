@@ -117,7 +117,33 @@ class Camera:
         else:
             self.threshval = old_thresh
         print "THRESHHOLD SET TO: " + str(self.threshval)
-      
+     
+    def quickfix(self):
+        # use one frame and find the closest working value to current thresh
+        frame = cv2.cvtColor((self.get_field()), cv2.COLOR_RGB2GRAY)
+        tries = 1
+        test_thresh = self.threshval
+        while tries < 50:
+            if tries % 2 == 0:
+                test_thresh = test_thresh - tries * self.thresh_cal_countby
+            else:
+                test_thresh = test_thresh + tries * self.thresh_cal_countby
+            (thr, bw) = cv2.threshold(frame, test_thresh, 255, cv2.THRESH_BINARY)
+            (contours, hierarchy) = cv2.findContours(bw, mode = cv2.cv.CR_RETR_EXTERNAL, 
+                                                       method = cv2.cv.CV_CHAIN_APPROX_SIMPLE)
+            for c in contours:
+                moments = cv2.moments(c, True)
+                if (len(filter(lambda x: x==0, moments.values())) > 0):# no divide by 0
+                    continue
+                if cv2.contourArea(c) < self.puck_min_px:
+                    continue
+                center = (moments['m10']/moments['m00'], moments['m01']/moments['m00'])
+                center = map(lambda x: int(round(x)), center) # float to integer
+                centers.append(center)
+            if len(centers) is 2:
+                self.threshval = test_thresh
+                return
+
     def get_targets(self):
         centers = []
         (contours, hierarchy) = cv2.findContours(self.get_bw(), mode=cv2.cv.CV_RETR_EXTERNAL, method=cv2.cv.CV_CHAIN_APPROX_SIMPLE)
@@ -128,11 +154,8 @@ class Camera:
             if cv2.contourArea(c) < self.puck_min_px:
                 # reduce false positives
                 continue
-            #else:
-            #    break
             center = (moments['m10']/moments['m00'], moments['m01']/moments['m00'])
             center = map(lambda x: int(round(x)), center) # float to integer
-            #center.append(cv2.coutourArea(c)) # store puck size
             centers.append(center)
         self.targets = centers
         return centers
