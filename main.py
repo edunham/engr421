@@ -91,12 +91,25 @@ def main(args):
                 break
     elif "new" in args:
         field = Field()
+        care = True # try to shoot after failmax fails?
+        fails = 0
+        failmax = 10
         while True:
             pucks = cam.get_pucks()
             if not pucks:
                 pucks = (cam.get_one())
             if not pucks:
-                continue
+                if care:
+                    fails += 1
+                    if fails > failmax:
+                        fails = 0
+                        pucks = cam.get_targets()
+                        pucks = (pucks[0], pucks[1])
+                    else:
+                        continue
+                else:continue
+            elif care:
+                fails = 0
             field.update_pucks(pucks)
             target = field.get_best_target_pos()
             for s in shooterlist:
