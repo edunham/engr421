@@ -4,6 +4,10 @@ import struct
 import time
 import cv2
 
+"""
+limits are currently set to 65 as max left and 115 as max right.
+
+"""
 class Line:
     def __init__(self, a, b, color):
         self.a = a  # (x,y)
@@ -43,14 +47,9 @@ class Shooter:
         
     def can_hit(self, target):
         if self.shots > 0:
-            return self.hit_default
+            if time.time() - .2 > self.last_shot:
+                return self.hit_default
         return False
-
-    def should_hit(self, target):
-        return self.hit_default
-
-    def must_hit(self, target):
-        return self.hit_default
 
     def target2angle(self, target):
         # y axis is upside-down :( (0,0) is TOP LEFT CORNER of image

@@ -29,6 +29,7 @@ class SerialCommander:
 
     def send(self, data):
         self.ser.write(data)
+        print "sending: " + data
 
     def read(self):
         prefix = "\tREAD:"

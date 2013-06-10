@@ -21,31 +21,44 @@ def tactical_shoot(shooters, centers):
     target = choose_center(centers)
     if target:
         for s in shooters:
-            s.aim(target)
-            if time.time() > s.last_shot + 1:
+#            if time.time() > s.last_shot + 1:
 #            if s.can_hit(target):
-#                s.shoot(target)
+            s.shoot(target)
 #            else:
-                    s.fire()
+#                    s.fire()
 
 def main(args):
     if "fake" in args:
         board = FakeArduino()
     else:
-        board = SerialCommander()
+        board = Arduino()
     cam = Camera()
     cam.calibrate()
     #cam.adj_thresh(2, 10)
     shooterlist = setup_shooters(args, board, offset_in = 9.5, field = cam.board_size, dpi = cam.dpi)
     if "old" in args:
+        print "using old program"
         while True:
             targets = cam.get_targets()
+            print targets
             tactical_shoot(shooterlist, targets)
             aims = [s.get_aim_line() for s in shooterlist]
             cam.display(aims) 
             if (cv2.waitKey(2) >= 0):
                 break
+    if "fail" in args:
+        print "using test program"
+        while True:
+            targets = cam.get_targets()
+            for s in shooterlist:
+                for t in targets:
+                    s.shoot(t)
+            aims = [s.get_aim_line() for s in shooterlist]
+            cam.display(aims)
+            if cv2.waitKey(2) >= 0:
+                break
     elif "new" in args:
+        print "using new program"
         field = Field()
         care = True # try to shoot after failmax fails?
         fails = 0
