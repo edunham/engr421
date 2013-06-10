@@ -5,8 +5,7 @@ import time
 import cv2
 
 """
-limits are currently set to 65 as max left and 115 as max right.
-
+limits are currently set to 65 as max right and 115 as max left.
 """
 class Line:
     def __init__(self, a, b, color):
@@ -29,15 +28,16 @@ class Shooter:
         # how far from the left side of the board is it?
         self.xpospx = xpos
 
-        self.leftdeg = 0
+        self.leftdeg = 115
         self.centerdeg = 90
-        self.rightdeg = 180
+        self.rightdeg = 65
 
         # (a,b) leftmost a and rightmost b where we're best to shoot, PX
         self.board_section = board_section
 
         self.theta = 45
-        self.shots = 50
+        self.shots = 500
+        self.seconds_between_shots = .5
         self.comms = comms
         self.number = n
         self.fieldpx = [field[0] * dpi, field[1] * dpi]
@@ -47,7 +47,7 @@ class Shooter:
         
     def can_hit(self, target):
         if self.shots > 0:
-            if time.time() - .2 > self.last_shot:
+            if time.time() - self.seconds_between_shots > self.last_shot:
                 return self.hit_default
         if self.shots == 0:
             print self.number + " is out of BBs!"
@@ -56,19 +56,20 @@ class Shooter:
 
     def target2angle(self, target):
         # y axis is upside-down :( (0,0) is TOP LEFT CORNER of image
+        # servo pos means 115 is LEFT and 65 is RIGHT :/
         opp = float(target[0] - self.xpospx)
         adj = float((self.fieldpx[1] - target[1]) + self.offsetpx)
-        self.theta = self.centerdeg + math.degrees(math.atan(opp/adj))
-        if self.theta <= self.leftdeg:
+        self.theta = self.centerdeg - math.degrees(math.atan(opp/adj))
+        if self.theta >= self.leftdeg:
             self.theta = self.leftdeg
-        elif self.theta >= self.rightdeg:
+        elif self.theta <= self.rightdeg:
             self.theta = self.rightdeg
         # print "\tready to aim" + self.number + ' at ' + str(float(self.theta))
         return self.theta
 
     def get_aim_line(self, line_length = 500):
         #TODO: fix the fact that (0,0) is top left corner
-        angle = self.centerdeg - self.theta # + for cw of straight; - for ccw
+        angle = self.theta - self.centerdeg # + for cw of straight; - for ccw
         y1 = self.fieldpx[1]
         # triangle not visible in img. adj is offset and opposite is where
         # barrel intersects line, since point where angle measured is pivot
