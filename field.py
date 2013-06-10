@@ -33,17 +33,21 @@ class Field():
             if self.triangle_state is "out" and self.star_state is not "off":
                 # assume the triangle went off the board
                 self.star_pos = pucks[0]
+                print "Triangle is off the field"
                 self.triangle_state = "off"
             elif self.star_state is "out" and self.triangle_state is not "off":
                 # assume the star went off the board
                 self.triangle_pos = pucks[0]
+                print "Star is off the field"
                 self.star_state = "off"
             return
         if pucks[0][1] > self.near_goal or pucks[0][1] < self.far_goal:
             # triangle y-pos says it's scored
             self.triangle_state = "out"
+            print "Triangle scored a point"
         if pucks[1][1] > self.near_goal or pucks[1][1] < self.far_goal:
             self.star_state = "out"
+            print "Star scored a point"
         self.triangle_pos = pucks[0]
         self.star_pos = pucks[1]
 
