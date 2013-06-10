@@ -121,6 +121,37 @@ class Camera:
         self.targets = centers
         return centers
 
+    def get_one(self):
+        l = self.get_targets()
+        if len(l) != 1:
+            return False
+        return l[0]
+
+    def get_pucks(self):
+        # Triangle, Star if 2 targets, else False
+        centers = []
+        (contours, hierarchy) = cv2.findContours(self.get_bw(), mode=cv2.cv.CV_RETR_EXTERNAL, method=cv2.cv.CV_CHAIN_APPROX_SIMPLE)
+        for c in contours:
+            moments = cv2.moments(c, True)
+            if (len(filter(lambda x: x==0, moments.values())) > 0):# no divide by 0
+                continue
+            if cv2.contourArea(c) < self.puck_min_px:
+                # reduce false positives
+                continue
+            #else:
+            #    break
+            center = (moments['m10']/moments['m00'], moments['m01']/moments['m00'])
+            center = map(lambda x: int(round(x)), center) # float to integer
+            #center.append(cv2.coutourArea(c)) # store puck size
+            centers.append((center, cv2.contourArea(c)))
+        if len(centers) != 2:
+            return False
+        self.targets = (centers[0][0], centers[1][0])
+        if centers[0][1] > centers[1][1]: # first target has greater area
+            return centers[0][0], centers[1][0]
+        else:
+            return centers[1][0], centers[0][0]
+
     def display(self, lines = None):
         cv2.imshow("RAW", self.raw_img)
         cv2.imshow("B&W", self.bw_img)
