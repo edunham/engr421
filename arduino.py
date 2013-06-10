@@ -28,8 +28,11 @@ class SerialCommander:
         self.read()
 
     def send(self, data):
-        self.ser.write(data)
-        print "sending: " + data
+        try:
+            self.ser.write(data)
+            print "sending: " + data
+        except SerialException:
+            print "caught a serial exception"
 
     def read(self):
         prefix = "\tREAD:"
