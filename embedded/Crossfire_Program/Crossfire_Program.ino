@@ -90,13 +90,13 @@
 #define angleLowest 65 //The minimum allowable angle
 #define angleHighest 115 //The maximum allowable angle
 
-#define motorLevel1 189 //PWM levls for the motors
-#define motorLevel2 185
+#define motorLevel1 202 //PWM levls for the motors
+#define motorLevel2 169
 #define motorLevel3 206
 
 #define offset1 -5 //offset angles for each servo
-#define offset2 -10
-#define offset3 -7
+#define offset2 -11
+#define offset3 -9
 
 // Libraries & Objects
 /*******************************************************************************************/
@@ -221,10 +221,9 @@ void setup(){
   servo2.attach(pinServo2,429,2571);
   servo3.attach(pinServo3,429,2571);
 
-
   //Run a test pattern on the LEDs
   float num = 200; //mS
-  for (byte i=0;i<7;i++){
+  for (byte i=0;i<2;i++){
     for (byte j=1;j<4;j++){
       digitalWrite(ledPinsY[j],HIGH);
       delay(num);
@@ -239,7 +238,40 @@ void setup(){
     }
   }
   
+/*
+  //Run a servo test - NOT  YET READY
+   for (byte i=0;i<1;i++){
+   for (byte j=angleLowest; j<=angleHighest; j++) {
+   servo1.write(j++offset1);
+   servo2.write(j++offset2);
+   servo3.write(j++offset3);
+   delay(20);
+   }
+   for (byte j=angleHighest; j>=angleLowest; j--) {
+   servo1.write(j++offset1);
+   servo2.write(j++offset2);
+   servo3.write(j++offset3);
+   delay(20);
+   }
+   }
+*/
+   
+   /*
+  for (byte i=0;i<3;i++){
+    byte j=angleLowest;
+        servo3.write(j);
+    servo1.write(j);
+    servo2.write(j);
 
+    delay(600);
+    j=angleHighest;
+        servo3.write(j);
+    servo1.write(j);
+    servo2.write(j);
+
+    delay(1000);
+  }
+*/
 
   //Set all servos to 90 degrees
   servo1.write(90+offset[1]);
@@ -552,6 +584,8 @@ void ISR_B2(){
 void ISR_B3(){
   buttonPressed[3]=1;
 }
+
+
 
 
 

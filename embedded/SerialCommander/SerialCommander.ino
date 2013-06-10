@@ -71,13 +71,13 @@
 #define ballReleaseTime2 24
 #define ballReleaseTime3 22
 
-#define motorLevel1 189 //PWM levls for the motors
-#define motorLevel2 185
+#define motorLevel1 202 //PWM levls for the motors
+#define motorLevel2 169
 #define motorLevel3 206
 
 #define offset1 -5 //offset angles for each servo
-#define offset2 -10
-#define offset3 -7
+#define offset2 -11
+#define offset3 -9
 
 
 // Libraries & Objects
@@ -288,8 +288,8 @@ void executeCommand(byte shooterNum){
   default: //If the string isn't 's' or 'm', is it assumed ot be a number, corresponding to an angle
     setShooterAngle(shooterNum,atof(StringIn));
 
+/*
     //To change the motor level isntead of the servo angle:
-    /*
     analogWrite(motorPins[shooterNum],atof(StringIn)); // #############################################################################
     Serial.print("Motor ");
     Serial.print(shooterNum);
