@@ -18,6 +18,7 @@ class Camera:
         self.dev_id = cam_id
         self.device = cap
         self.threshval = 170
+        self.thresh_cal_countby = 2 # for autocalibration
         self.cornerpoints = []
         self.calibration_message = """
         CALIBRATING:
@@ -84,20 +85,35 @@ class Camera:
             trans = cv2.getPerspectiveTransform(src, dest)
             self.tmat = trans
 
+    def maths(self, vals):
+        if len(vals) < 2:
+            return vals[0] if vals[0] else []
+        blocks = []
+        block = []
+        for n in range(1, len(vals)):
+            if vals[n-1] + self.thresh_cal_countby == vals[n]:
+                block.append(vals[n-1])
+            else:
+                blocks.append(block)
+                block = []
+        blocks = sorted(blocks, key = lambda x : len(x), reverse = True)
+        avg_of_largest_block = reduce(lambda x, y: x + y, blocks[0]) / len(blocks[0]) 
+        return int(avg_of_largest_block) 
+
     def adj_thresh(self, pucks, stability = 10):
         # set self.threshval such that correct number of pucks show up for 
         # the number of consecutive frames set by stability
         old_thresh = self.threshval
         works = []
         print "auto-calibrating threshold..."
-        for t in range(140, 200, 2):
+        for t in range(140, 200, self.thresh_cal_countby):
             print "\t trying " + str(t)
             self.threshval = t
             if all((len(self.get_targets()) == pucks) for x in range(stability)):
                 works.append(t)
         print "VALID THRESHOLDS: " + str(works)
         if works:
-            self.threshval = works[0]
+            self.threshval = self.maths(works)
         else:
             self.threshval = old_thresh
         print "THRESHHOLD SET TO: " + str(self.threshval)
