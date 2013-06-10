@@ -4,7 +4,7 @@ import cv2
 import sys
 import time
 
-from arduino import Arduino, FakeArduino, SerialCommander
+from arduino import Arduino, FakeArduino
 from camera import Camera
 from field import Field
 from setupcode import *
@@ -24,8 +24,8 @@ def tactical_shoot(shooters, centers):
 #            if time.time() > s.last_shot + 1:
 #            if s.can_hit(target):
             s.shoot(target)
-#            else:
-#                    s.fire()
+    else:
+        print "tactical shoot failed"
 
 def main(args):
     if "fake" in args:
@@ -40,10 +40,10 @@ def main(args):
         print "using old program"
         while True:
             targets = cam.get_targets()
-            print targets
             tactical_shoot(shooterlist, targets)
             aims = [s.get_aim_line() for s in shooterlist]
             cam.display(aims) 
+            board.read()
             if (cv2.waitKey(2) >= 0):
                 break
     if "fail" in args:
@@ -66,14 +66,14 @@ def main(args):
         while True:
             pucks = cam.get_pucks()
             if not pucks:
-                pucks = (cam.get_one())
+                pucks = [cam.get_one()]
             if not pucks:
                 if care:
                     fails += 1
                     if fails > failmax:
                         fails = 0
                         pucks = cam.get_targets()
-                        pucks = (pucks[0], pucks[1])
+                        pucks = (pucks[0])
                     else:
                         continue
                 else:continue
