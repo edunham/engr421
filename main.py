@@ -72,8 +72,10 @@ def main(args):
                     fails += 1
                     if fails > failmax:
                         fails = 0
-                        pucks = cam.get_targets()
-                        pucks = (pucks[0])
+                        print "Fails exceeded maximum; attempting quickfix"
+                        cam.quickfix(field.get_min_pucks())
+                        #pucks = cam.get_targets()
+                        #pucks = (pucks[0])
                     else:
                         continue
                 else:continue

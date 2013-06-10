@@ -118,12 +118,12 @@ class Camera:
             self.threshval = old_thresh
         print "THRESHHOLD SET TO: " + str(self.threshval)
      
-    def quickfix(self):
+    def quickfix(self, number):
         # use one frame and find the closest working value to current thresh
         frame = cv2.cvtColor((self.get_field()), cv2.COLOR_RGB2GRAY)
         tries = 1
         test_thresh = self.threshval
-        while tries < 50:
+        while tries < 20:
             if tries % 2 == 0:
                 test_thresh = test_thresh - tries * self.thresh_cal_countby
             else:
@@ -140,7 +140,7 @@ class Camera:
                 center = (moments['m10']/moments['m00'], moments['m01']/moments['m00'])
                 center = map(lambda x: int(round(x)), center) # float to integer
                 centers.append(center)
-            if len(centers) is 2:
+            if len(centers) is number:
                 self.threshval = test_thresh
                 return
 
