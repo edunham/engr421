@@ -67,17 +67,17 @@
 
 #define commsTimeout 200 //The maximum time that a received serial command can take, in mS
 
-#define ballReleaseTime1 35 //The time that the solenoid needs to be activated for to release a ball, in mS
-#define ballReleaseTime2 28
-#define ballReleaseTime3 24
+#define ballReleaseTime1 30 //The time that the solenoid needs to be activated for to release a ball, in mS
+#define ballReleaseTime2 24
+#define ballReleaseTime3 22
 
 #define motorLevel1 189 //PWM levls for the motors
 #define motorLevel2 185
-#define motorLevel3 187
+#define motorLevel3 206
 
-#define offset1 -3 //offset angles for each servo
-#define offset2 -4
-#define offset3 0
+#define offset1 -5 //offset angles for each servo
+#define offset2 -10
+#define offset3 -7
 
 
 // Libraries & Objects
@@ -388,8 +388,8 @@ void checkButtons(){
   for (byte i=1; i<4; i++) {
     if (buttonPressed[i]==1) {
       buttonPressed[i]=0;
-      //Only accept the button press if there hasn't been one in the last 100mS
-      if ((millis()-lastButtonPress)>100){
+      //Only accept the button press if there hasn't been one in the last 200mS
+      if ((millis()-lastButtonPress)>200){
         lastButtonPress=millis();
         //Perform Action Here
         releaseBall(i);

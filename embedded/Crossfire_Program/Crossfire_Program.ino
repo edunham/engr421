@@ -69,7 +69,6 @@
 #define pinConfig1 17
 #define pinConfig2 21
 
-
 //Arbiter
 #define pinArbiter 52
 
@@ -77,27 +76,27 @@
 /*******************************************************************************************/
 #define DEBUG 1 //Defining DEBUG turns ON debugging messages
 
-#define killMsgSend 0 //Prevents the arduino from sending the functional messages to the laptop
+#define killMsgSend 1 //Prevents the arduino from sending the functional messages to the laptop
 
 #define commsTimeout 200 //The maximum time that a received serial command can take, in mS
 
-#define ballReleaseTime1 35 //The time that the solenoid needs to be activated for to release a ball, in mS
-#define ballReleaseTime2 28
-#define ballReleaseTime3 24
+#define ballReleaseTime1 30 //The time that the solenoid needs to be activated for to release a ball, in mS
+#define ballReleaseTime2 24
+#define ballReleaseTime3 22
 
 //#define ballReleaseInt floor((ballReleaseTime1*125)/8) //The number of 64uS needed to get to ballReleaseTime
 
 
-#define angleLowest 30 //The minimum allowable angle
-#define angleHighest 150 //The maximum allowable angle
+#define angleLowest 65 //The minimum allowable angle
+#define angleHighest 115 //The maximum allowable angle
 
 #define motorLevel1 189 //PWM levls for the motors
 #define motorLevel2 185
-#define motorLevel3 187
+#define motorLevel3 206
 
-#define offset1 -3 //offset angles for each servo
-#define offset2 -4
-#define offset3 0
+#define offset1 -5 //offset angles for each servo
+#define offset2 -10
+#define offset3 -7
 
 // Libraries & Objects
 /*******************************************************************************************/
@@ -169,6 +168,7 @@ void setup(){
   commandLength[3]=2;
 
   commandLength[0x80]=0;
+  commandLength[0x81]=0;
   commandLength[0xE0]=1;
   commandLength[0xE1]=1;
   commandLength[0xE2]=2;
@@ -223,25 +223,22 @@ void setup(){
 
 
   //Run a test pattern on the LEDs
-
-
   float num = 200; //mS
-  for (byte i=0;i<6;i++){
-    for (byte z=1;z<4;z++){
-      digitalWrite(ledPinsY[z],HIGH);
+  for (byte i=0;i<7;i++){
+    for (byte j=1;j<4;j++){
+      digitalWrite(ledPinsY[j],HIGH);
       delay(num);
       num=num*0.93;
-      digitalWrite(ledPinsY[z],LOW);
+      digitalWrite(ledPinsY[j],LOW);
     }
-    for (byte z=3;z>0;z--){
-      digitalWrite(ledPins[z],HIGH);
+    for (byte j=3;j>0;j--){
+      digitalWrite(ledPins[j],HIGH);
       delay(num);
       num=num*0.93;
-      digitalWrite(ledPins[z],LOW);
+      digitalWrite(ledPins[j],LOW);
     }
   }
-
-
+  
 
 
   //Set all servos to 90 degrees
