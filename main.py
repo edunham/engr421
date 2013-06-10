@@ -39,9 +39,7 @@ def main(args):
     if "old" in args:
         print "using old program"
         while True:
-            print "in loop"
             targets = cam.get_targets()
-            print targets
             tactical_shoot(shooterlist, targets)
             aims = [s.get_aim_line() for s in shooterlist]
             cam.display(aims) 

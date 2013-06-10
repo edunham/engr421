@@ -198,7 +198,6 @@ class Camera:
         linewidth = 2
         radius = 20
         for t in self.targets:
-            # print t
             cv2.circle(output, tuple(t), radius, cv2.cv.RGB(0,255,255), linewidth)
         if lines is not None:
             for l in lines:

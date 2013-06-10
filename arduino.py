@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 import serial
 import os
+import time
 
 class Arduino:
     def __init__(self):
@@ -41,20 +42,20 @@ class Arduino:
     def send(self, data):
         try:
             self.ser.write(data)
-            print "sending: " + data
-        except SerialException:
+        except Exception:
             print "caught a serial exception"
+        self.read()
 
 
     def read(self):
         #print "READ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`"
-        prefix = "\tREAD:"
+        prefix = " READ:"
         while self.ser.inWaiting() > 0: # something there to read
             line = self.ser.readline()[:-1] # strip \n
             for msg, val in self.infos.iteritems():
                 if val in line:
                     handle_message(msg, line)
-            print prefix + line
+            print str(time.time()) + prefix + line
             prefix = "\t\t"
         self.ser.flushInput() # else eventual freeze
         self.ser.flushOutput()

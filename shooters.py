@@ -49,6 +49,9 @@ class Shooter:
         if self.shots > 0:
             if time.time() - .2 > self.last_shot:
                 return self.hit_default
+        if self.shots == 0:
+            print self.number + " is out of BBs!"
+            self.shots = -1
         return False
 
     def target2angle(self, target):
