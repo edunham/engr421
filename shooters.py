@@ -57,6 +57,8 @@ class Shooter:
     def target2angle(self, target):
         # y axis is upside-down :( (0,0) is TOP LEFT CORNER of image
         # servo pos means 115 is LEFT and 65 is RIGHT :/
+        if not target:
+            return self.theta
         opp = float(target[0] - self.xpospx)
         adj = float((self.fieldpx[1] - target[1]) + self.offsetpx)
         self.theta = self.centerdeg - math.degrees(math.atan(opp/adj))
