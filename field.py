@@ -14,10 +14,11 @@ class Field():
         #########################
         magic_near_inches = 11 ##
         magic_far_inches = 11  ##
+        magic_oh_shit = 3
         #########################
         self.magic_near_distance = (self.board_size[1] - magic_near_inches) * dpi
         self.magic_far_distance = magic_far_inches * dpi
-
+        self.magic_oh_shit = magic_oh_shit * dpi
     def get_min_pucks(self):
         # how many pucks should we be able to see?
         if self.triangle_state is "in"  and self.star_state is "in":
@@ -58,6 +59,11 @@ class Field():
         Otherwise, it's the star.
         Yields false if neither puck is still in the game.
         """
+        if self.star_state is "in" and self.star_pos[1] > self.magic_oh_shit:
+            return self.star_pos
+        if self.triangle_state is "in" and self.triangle_pos[1] > self.magic_oh_shit:
+            return self.triangle_pos
+        
         if self.triangle_state is "in" and self.star_state is "in":
             if self.triangle_pos[1] < self.magic_far_distance or self.triangle_pos[1] > self.magic_near_distance:
                 # triangle first, assuming it takes more hits to move it

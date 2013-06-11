@@ -34,7 +34,7 @@ def main(args):
         board = Arduino()
     cam = Camera()
     cam.calibrate()
-    #cam.adj_thresh(2, 10)
+    cam.adj_thresh(2, 3)
     shooterlist = setup_shooters(args, board, offset_in = 9.5, field = cam.board_size, dpi = cam.dpi)
     if "old" in args:
         print "using old program"
@@ -91,6 +91,8 @@ def main(args):
             if cv2.waitKey(2) >= 0:
                 break
     cam.cleanup()
+    print "THRESHHOLD WAS: " + str(cam.threshval)
+
 
 if __name__ == "__main__":
     main(sys.argv)

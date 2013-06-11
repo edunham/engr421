@@ -17,7 +17,7 @@ class Camera:
         
         self.dev_id = cam_id
         self.device = cap
-        self.threshval = 170
+        self.threshval = 160 
         self.thresh_cal_countby = 2 # for autocalibration
         self.cornerpoints = []
         self.calibration_message = """
@@ -113,7 +113,7 @@ class Camera:
                 works.append(t)
         print "VALID THRESHOLDS: " + str(works)
         if works:
-            self.threshval = self.maths(works)
+            self.threshval = reduce(lambda x, y: x + y, works) / len(works)
         else:
             self.threshval = old_thresh
         print "THRESHHOLD SET TO: " + str(self.threshval)
