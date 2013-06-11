@@ -59,23 +59,27 @@ class Field():
         Otherwise, it's the star.
         Yields false if neither puck is still in the game.
         """
-        if self.star_state is "in" and self.star_pos[1] > self.magic_oh_shit:
-            return self.star_pos
-        if self.triangle_state is "in" and self.triangle_pos[1] > self.magic_oh_shit:
-            return self.triangle_pos
-        
-        if self.triangle_state is "in" and self.star_state is "in":
-            if self.triangle_pos[1] < self.magic_far_distance or self.triangle_pos[1] > self.magic_near_distance:
-                # triangle first, assuming it takes more hits to move it
-                return self.triangle_pos
-            if self.star_pos[1] < self.magic_far_distance or self.star_pos[1] > self.magic_near_distance:
+        try:
+            if self.star_state is "in" and self.star_pos[1] > self.magic_oh_shit:
                 return self.star_pos
-            return self.star_pos
-        if self.triangle_state is not "in":
-            if self.star_state is "in":
-                return self.star_pos
-            return False
-        elif self.star_state is not "in":
-            if self.triangle_state is "in":
+            if self.triangle_state is "in" and self.triangle_pos[1] > self.magic_oh_shit:
                 return self.triangle_pos
+            
+            if self.triangle_state is "in" and self.star_state is "in":
+                if self.triangle_pos[1] < self.magic_far_distance or self.triangle_pos[1] > self.magic_near_distance:
+                    # triangle first, assuming it takes more hits to move it
+                    return self.triangle_pos
+                if self.star_pos[1] < self.magic_far_distance or self.star_pos[1] > self.magic_near_distance:
+                    return self.star_pos
+                return self.star_pos
+            if self.triangle_state is not "in":
+                if self.star_state is "in":
+                    return self.star_pos
+                return False
+            elif self.star_state is not "in":
+                if self.triangle_state is "in":
+                    return self.triangle_pos
+                return False
+        except ValueError:
+            self.triangle_state = "in"
             return False
