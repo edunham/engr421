@@ -44,7 +44,7 @@ class Shooter:
         self.hit_default = hit_default
         self.last_shot = time.time()
         self.line_color = line_color
-        self.last_aim = 45
+        self.last_target = None
         self.mod = 1
 
     def can_hit(self, target):
@@ -87,18 +87,19 @@ class Shooter:
 
     def aim(self, target):
         self.target2angle(target)
+        if self.last_target == target:
+            self.theta += self.mod
+            self.mod = (self.mod + 1) * -1
+        else:
+            self.mod = 0
+        self.last_target = target
         self.comms.aim(self.number, struct.pack('B', (round((self.theta)))))
 
     def fire(self):
-        if self.last_aim == self.theta:
-            self.theta += self.mod
-            self.mod += 1
-            self.mod = self.mod * -1
         self.comms.fire(self.number)
         self.last_shot = time.time()
         self.shots -= 1
 
     def shoot(self, target):
-        self.last_aim = self.theta
         self.aim(target)
         self.fire()
