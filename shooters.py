@@ -37,14 +37,16 @@ class Shooter:
 
         self.theta = 45
         self.shots = 500
-        self.seconds_between_shots = .5
+        self.seconds_between_shots = .4
         self.comms = comms
         self.number = n
         self.fieldpx = [field[0] * dpi, field[1] * dpi]
         self.hit_default = hit_default
         self.last_shot = time.time()
         self.line_color = line_color
-        
+        self.last_aim = 45
+        self.mod = 1
+
     def can_hit(self, target):
         if self.shots > 0:
             if time.time() - self.seconds_between_shots > self.last_shot:
@@ -88,10 +90,15 @@ class Shooter:
         self.comms.aim(self.number, struct.pack('B', (round((self.theta)))))
 
     def fire(self):
+        if self.last_aim == self.theta:
+            self.theta += self.mod
+            self.mod += 1
+            self.mod = self.mod * -1
         self.comms.fire(self.number)
         self.last_shot = time.time()
         self.shots -= 1
 
     def shoot(self, target):
+        self.last_aim = self.theta
         self.aim(target)
         self.fire()

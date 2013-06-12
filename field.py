@@ -80,6 +80,8 @@ class Field():
                 if self.triangle_state is "in":
                     return self.triangle_pos
                 return False
-        except ValueError:
+        except TypeError:
+            print "HANDLED TYPE ERROR"
+            self.star_state = "in"
             self.triangle_state = "in"
             return False

@@ -106,7 +106,7 @@ class Camera:
         old_thresh = self.threshval
         works = []
         print "auto-calibrating threshold..."
-        for t in range(140, 200, self.thresh_cal_countby):
+        for t in range(160, 200, self.thresh_cal_countby):
             print "\t trying " + str(t)
             self.threshval = t
             if all((len(self.get_targets()) == pucks) for x in range(stability)):
