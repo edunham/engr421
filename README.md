@@ -5,16 +5,24 @@ Dean Reading -- Electrical
 
 Emily Dunham -- Software
 
-Minna O'Brien -- Mechanicla
+Minna O'Brien -- Mechanical
 
 Team [web site][site]
 
 [site]:https://sites.google.com/site/engr421team4/
 
+Note:
+-----
+
+As of June 2013, this code base is no longer under active development and 
+will not be tested or maintained. You're welcome to use it (see LICENSE for
+details) but be warned that it might not work with newer versions of its 
+dependencies.
+
 Laptop software
 ---------------
 
-Vision code written and maintained by edunham unless marked otherwise.
+Vision code written ~~and maintained~~ by edunham unless marked otherwise.
 
 All python code requires OpenCV libraries to run. 
 ymmv with the versions in your package manger; my cv2.__version__ is Rev 4557
@@ -22,7 +30,7 @@ ymmv with the versions in your package manger; my cv2.__version__ is Rev 4557
 Arduino software
 ----------------
 
-Arduino code written and maintained by Dean Reading unless marked otherwise. 
+Arduino code written ~~and maintained~~ by Dean Reading unless marked otherwise. 
 
 The .ino files require the Arduino IDE thing to run, which is named arduino 
 and can be installed from one's package manager.
